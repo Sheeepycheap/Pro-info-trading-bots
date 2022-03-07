@@ -1,3 +1,4 @@
+from turtle import pos
 import MetaTrader5 as mt5 
 
 mt5.initialize()
@@ -9,13 +10,13 @@ mt5.login(login,password,server)
 
 print("ok")
 
-account_info = mt5.account_info()
-
-request = {
-    "action" : mt5.TRADE_ACTION_DEAL  ,  
+#position = mt5.positions_get()[0]._asdict()['ticket']
+#volume = mt5.positions_get()[0]._asdict()['volume']
+orders = {
+    "action" : mt5.TRADE_ACTION_DEAL ,  
     "symbol" : "BTCUSD" ,
-    "volume" : 4.0 ,
-    "type" : mt5.ORDER_TYPE_BUY ,
+    "volume" : "volume" ,
+    "type" : mt5.ORDER_TYPE_SELL ,
     "price" : mt5.symbol_info_tick("BTCUSD").ask,
     "sl" : 0.0 ,
     "tp" : 0.0 ,
@@ -23,7 +24,12 @@ request = {
     "magic" : 234000 ,
     "comment" : "test",
     "type_time" : mt5.ORDER_TIME_GTC,
-    "type filling" : mt5.ORDER_FILLING_IOC,
+    "type filling" : mt5.ORDER_FILLING_IOC, 
+    'position' : "position",          
 }
-order = mt5.order_send(request)
-print(order)
+
+prix = mt5.symbol_info("BTCUSD").ask
+print(prix)
+account_info = mt5.account_info()
+#mt5.order_send(orders)
+#print(position)

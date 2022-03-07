@@ -30,7 +30,21 @@ def strat_de_paul(data) :
                 if data['zscore'][j] < data['zscore ema'][j] and data['zscore'][j-1] > data['zscore ema'][j-1]  :
                     no_op = False 
                     openop.append(data['Close'][j])
-                    break     
+                    break 
+
+# Cette statégie semble peut rentable , mais en faisant : on prend le short si zscore >=3 et on clôture 
+# au premier croisement, on a de meilleur résultat ( à vérifier ). ça donne ça : 
+#    def strat_de_paul(data) : 
+#    no_op = True # a-t-on une opération en attente ? si c'est True ça veut dire qu'il n'y a pas d'ordre en attente d'être clôt 
+#                # donc on peut procéder à une opération. C'est pour éviter d'ouvrir 2 positions à la fois 
+#   for i in range (len(data)) :  
+#       if data['zscore'][i] < data['zscore ema'][i] and data['zscore'][i-1] > data['zscore ema'][i-1] and no_op == False :
+#            closeop.append(data['Close'][i])
+#            no_op=True
+#        elif data['zscore'][i] >= 3 and no_op == True  :
+#             no_op = False 
+#             openop.append(data['Close'][i])
+            
 
 strat_de_paul(df)
 
