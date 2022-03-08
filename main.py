@@ -17,7 +17,13 @@ usr_login(usr = 41552251, mdp = "ee4rli8A1iLU", server = "AdmiralMarkets-Demo" )
 print(mt5.last_error())
 
 bot1 = bot.TroisMA(mt5symbol="BTCUSD",volume = 0.05,ysymbol="BTC-USD")
-print(bot1.mt5symbol)
+
+print(bot1.position_ouverte, bot1.dead,)
+n = len(bot1.df) - 1
+print(bot1.df['5EMA_Close'][n])
+print(bot1.df['20EMA_Close'][n])
+print(bot1.df['60EMA_Close'][n])
+print(bot1.df['5EMA_Close'][n] > bot1.df['20EMA_Close'][n] and bot1.df['20EMA_Close'][n] > bot1.df['60EMA_Close'][n] and  bot1.position_ouverte == False)
 bot.TroisMA.process_open_buy(bot1)
 
 

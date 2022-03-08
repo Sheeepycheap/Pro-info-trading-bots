@@ -32,8 +32,8 @@ class TroisMA :
         "deviation" : 20 ,
         "magic" : 234000 ,
         "comment" : "test",
-        "type_time" : "mt5.ORDER_TIME_GTC",
-        "type filling" : "mt5.ORDER_FILLING_IOC",            
+        "type_time" : mt5.ORDER_TIME_GTC,
+        "type filling" : mt5.ORDER_FILLING_IOC,            
         }
         self.position_ouverte = False 
         # determine la position dans laquelle où nous sommes : a-t-on une 
@@ -44,7 +44,7 @@ class TroisMA :
         self.df = ind.ema(self.df,length=5,column='Close')
         self.df = ind.ema(self.df,length=60,column='Close')
         self.pill2kill = []
-        self.dead =True 
+        self.dead = True 
 
     def request(self,action,type,price,sl,tp,comment,position_ouverte : bool) -> None :
         #""
@@ -66,17 +66,22 @@ class TroisMA :
 
 
     def process_open_buy(self) :
+        c=1 
         while self.dead :
+            print(c)
+            c+=1
             n=len(self.df) - 1 
+            print(self.df['5EMA_Close'][n] > self.df['20EMA_Close'][n] and self.df['20EMA_Close'][n]>self.df['60EMA_Close'][n] and  self.position_ouverte == False )
             if self.df['5EMA_Close'][n]>self.df['20EMA_Close'][n] and self.df['20EMA_Close'][n]>self.df['60EMA_Close'][n] and  self.position_ouverte == False :
                 prix = mt5.symbol_info_tick(self.mt5symbol).ask
-                print(mt5.last_error())
+                print("ok")
                 self.request(action = mt5.TRADE_ACTION_DEAL, type = mt5.ORDER_TYPE_BUY, price = prix, sl = 0.0,tp=0.0, comment = "call",  position_ouverte= True )
                 if 'position' in self.orders.keys() :
                     ind.removekey(self.orders)
                     mt5.order_send(self.orders)
                 else :
                     mt5.order_send(self.orders)
+                    print(self.orders)
             elif self.df['5EMA_Close'][n]<self.df['20EMA_Close'][n] and self.df['20EMA_Close'][n]<self.df['60EMA_Close'][n] and  self.position_ouverte == True :
                 prix = mt5.symbol_info_tick(self.mt5symbol).ask
                 self.request(action = mt5.TRADE_ACTION_DEAL, type = mt5.ORDER_TYPE_SELL, price = prix, sl = 0.0,tp=0.0, comment = "sell",  position_ouverte= True )

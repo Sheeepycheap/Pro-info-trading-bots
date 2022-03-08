@@ -19,8 +19,9 @@ class Voiture :
         #return self.prix
 pr = mt5.symbol_info_tick("EURUSD")
 v1 = Voiture(ysymbol="BTC-USD",mt5symbol="BTCUSD")
-print(pr)
-print(mt5.last_error())
+
+print(17 > 5)
+
 
 
 
