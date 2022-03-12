@@ -7,8 +7,8 @@ import yfinance as yf
 # Part 1 : Get the datas 
 #aapl = yf.Ticker('AAPL')
 #df = aapl.history(period='1y')
-df = yf.download( "BTC-USD",start = '2022-03-04', interval='1m')
-
+df = yf.download( "ETH-USD",start = '2022-03-04', interval='1m')
+df.dropna(inplace=True)
 # Part 2 : show the Data 
 plt.title('Cours de AAPL')
 plt.plot(df.index,df['Close'])
@@ -16,12 +16,15 @@ plt.xlabel("Date")
 plt.ylabel("Price")
 
 # Part 3 : Calculate the EMAs 
+
 df['5ema']=df['Close'].ewm(span = 4 , adjust = False).mean()
 shortEMA= df['5ema']
 df['60ema']=df['Close'].ewm(span = 18 , adjust = False).mean()
 longEMA = df['60ema']
 df['20ema']=df['Close'].ewm(span = 9 , adjust = False).mean()
 MiddleEMA=df['20ema']
+df.dropna(inplace=True)
+print(df)
 
 # Part 4 : show the EMAs 
 plt.plot(shortEMA, label = "5ema", color ='violet')
@@ -37,7 +40,7 @@ def buy_sell(data) :
     # PositionSell determine la position dans laquelle où nous sommes : doit-on acheter ou vendre ?
     PositionSell = False # on est pas dans une position où l'on doit vendre avant de procéder à une autre action.
     for i in range (0, len(data)) :
-        if data['5ema'][i]>data['20ema'][i] and data['20ema'][i]>data['60ema'][i] and  PositionSell == False :
+        if data['5ema'][i] > data['20ema'][i] and data['20ema'][i]>data['60ema'][i] and  PositionSell == False :
             buy.append(data['Close'][i])
             PositionSell = True
             test1.append(data['Close'][i])
@@ -60,13 +63,22 @@ def pv(list1,list2) :
     res = []
     if len(list1)>len(list2) :
         for i in range(0,len(list2)) :
-            res.append(((list2[i] - list1[i])/list1[i])*100)
+            res.append(((list2[i] - list1[i])/list1[i]))
     if len(list1)<len(list2) :
         for i in range(0,len(list1)) :
-            res.append(((list2[i] - list1[i])/list1[i])*100)           
+            res.append(((list2[i] - list1[i])/list1[i]))           
     if len(list1) == len(list2) :
         for i in range(0,len(list1)) :
-            res.append(((list2[i] - list1[i])/list1[i])*100)
+            res.append(((list2[i] - list1[i])/list1[i]))
     return res 
-print (pv(buy_sell(df)[2],buy_sell(df)[3]))
+
+def resultat(n,res) :
+    x = n
+    for i in range(1,len(res)):
+        x= x + x*res[i]
+    return x
+
+res = pv(buy_sell(df)[2],buy_sell(df)[3])
+
+print (resultat(10000,res))
 plt.show()

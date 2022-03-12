@@ -8,6 +8,7 @@ import MetaTrader5 as mt5
 from datetime import datetime
 from threading import Thread
 import time 
+
 class TroisMA :
     # ""
     # Il s'agit d'implémenter la stratégie des 3MA. Bien que peu efficace, elle reste rentable. 
@@ -71,8 +72,9 @@ class TroisMA :
             print(c)
             c+=1
             n=len(self.df) - 1 
-            print(self.df['5EMA_Close'][n] > self.df['20EMA_Close'][n] and self.df['20EMA_Close'][n]>self.df['60EMA_Close'][n] and  self.position_ouverte == False )
-            if self.df['5EMA_Close'][n]>self.df['20EMA_Close'][n] and self.df['20EMA_Close'][n]>self.df['60EMA_Close'][n] and  self.position_ouverte == False :
+            print(self.df['5EMA_Close'][n] > self.df['20EMA_Close'][n] and self.df['20EMA_Close'][n] > self.df['60EMA_Close'][n] and  self.position_ouverte == False )
+            print(self.df['5EMA_Close'][n] < self.df['20EMA_Close'][n] and self.df['20EMA_Close'][n]<self.df['60EMA_Close'][n] and  self.position_ouverte == True)
+            if self.df['5EMA_Close'][n] > self.df['20EMA_Close'][n] and self.df['20EMA_Close'][n] > self.df['60EMA_Close'][n] and  self.position_ouverte == False :
                 prix = mt5.symbol_info_tick(self.mt5symbol).ask
                 print("ok")
                 self.request(action = mt5.TRADE_ACTION_DEAL, type = mt5.ORDER_TYPE_BUY, price = prix, sl = 0.0,tp=0.0, comment = "call",  position_ouverte= True )
@@ -82,10 +84,10 @@ class TroisMA :
                 else :
                     mt5.order_send(self.orders)
                     print(self.orders)
-            elif self.df['5EMA_Close'][n]<self.df['20EMA_Close'][n] and self.df['20EMA_Close'][n]<self.df['60EMA_Close'][n] and  self.position_ouverte == True :
-                prix = mt5.symbol_info_tick(self.mt5symbol).ask
-                self.request(action = mt5.TRADE_ACTION_DEAL, type = mt5.ORDER_TYPE_SELL, price = prix, sl = 0.0,tp=0.0, comment = "sell",  position_ouverte= True )
-                position = mt5.positions_get()[-1]
+            elif self.df['5EMA_Close'][n] < self.df['20EMA_Close'][n] and self.df['20EMA_Close'][n] < self.df['60EMA_Close'][n] and  self.position_ouverte == True :
+                prix = mt5.symbol_info_tick(self.mt5symbol).bid
+                self.request(action = mt5.TRADE_ACTION_DEAL, type = mt5.ORDER_TYPE_SELL, price = prix, sl = 0.0,tp=0.0, comment = "sell",  position_ouverte = False )
+                position = mt5.positions_get()[-1].ticket
                 ind.addkey(self.orders, position=position)  
                 mt5.order_send(self.orders)
             print(self.df['5EMA_Close'][n])
