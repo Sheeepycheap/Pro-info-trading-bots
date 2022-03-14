@@ -6,7 +6,9 @@ mt5.initialize()
 login = 41552251
 password = "ee4rli8A1iLU"
 server = "AdmiralMarkets-Demo"
-mt5.login(login,password,server)
+if not mt5.login(login,password,server) :
+    print("nope")
+
 
 
 position = mt5.positions_get()[-1].ticket
