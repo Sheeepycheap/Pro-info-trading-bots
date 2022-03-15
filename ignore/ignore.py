@@ -1,0 +1,41 @@
+import bot
+import MetaTrader5 as mt5
+
+
+def usr_login(usr : int, mdp : str, server : str) :
+    if not mt5.initialize() : 
+         print("MetaTrader5 n'a pas pu être initialisée")
+         quit()
+    else : 
+        if not mt5.login(usr,mdp,server) : 
+            print("Vérifiez vos identifiants")
+        else : 
+            print("Connexion réussie !")
+
+usr_login(usr = 41552251, mdp = "ee4rli8A1iLU", server = "AdmiralMarkets-Demo" )
+
+print(mt5.last_error())
+
+bot1 = bot.TroisMA(mt5symbol="BTCUSD",volume = 0.03,ysymbol="BTC-USD")
+
+print(bot1.position_ouverte, bot1.dead,)
+n = len(bot1.df) - 1
+print(bot1.df['5EMA_Close'][n])
+print(bot1.df['20EMA_Close'][n])
+print(bot1.df['60EMA_Close'][n])
+print(bot1.df['5EMA_Close'][n] > bot1.df['20EMA_Close'][n] and bot1.df['20EMA_Close'][n] > bot1.df['60EMA_Close'][n] and  bot1.position_ouverte == False)
+bot1.open_buy()
+p=[]
+p.append(bot1)
+print("The thread is working !")
+
+n = input("write stop to end the program")
+print(n)
+if n == "stop" :
+    for thread in p :
+        print(thread)
+        print(isinstance(thread,bot.TroisMA)) 
+        if isinstance(thread,bot.TroisMA) :
+            bot.TroisMA.kill(thread)
+            print(p)
+

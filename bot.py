@@ -9,6 +9,8 @@ from datetime import datetime
 from threading import Thread
 import time 
 
+
+
 class TroisMA :
     # ""
     # Il s'agit d'implémenter la stratégie des 3MA. Bien que peu efficace, elle reste rentable. 
@@ -40,7 +42,7 @@ class TroisMA :
         # determine la position dans laquelle où nous sommes : a-t-on une 
         # position ouverte ? False signifie que nous n'avons pas de position ouverte : on peut procéder
         # à une opération. 
-        self.df = ind.ydataframe(stock = ysymbol, start= '2022-03-04', interval='1m') 
+        self.df = ind.ydataframe(stock = ysymbol, start= '2022-03-14', interval='1m') 
         self.df = ind.ema(self.df,length=20,column='Close')
         self.df = ind.ema(self.df,length=5,column='Close')
         self.df = ind.ema(self.df,length=60,column='Close')
@@ -60,7 +62,7 @@ class TroisMA :
         self.position_ouverte = position_ouverte
     
     def update_df(self) : 
-        self.df = ind.ydataframe(stock = self.ysymbol, start= '2022-03-04', interval='1m') 
+        self.df = ind.ydataframe(stock = self.ysymbol, start= '2022-03-14', interval='1m') 
         self.df = ind.ema(self.df,length=20,column='Close')
         self.df = ind.ema(self.df,length=5,column='Close')
         self.df = ind.ema(self.df,length=60,column='Close')
@@ -94,17 +96,16 @@ class TroisMA :
             print(self.df['20EMA_Close'][n])
             print(self.df['60EMA_Close'][n])
             self.update_df()
-            time.sleep(60)
+            time.sleep(10)
 
     def open_buy(self) :
-        thread = threading.Thread(target= self.process_open_buy, args=[self])
+        thread = threading.Thread(target= self.process_open_buy)
         self.pill2kill.append(thread)
         thread.start()
 
     def kill(self) : 
         self.dead = False 
         self.pill2kill[0].join()
-
 
 
 

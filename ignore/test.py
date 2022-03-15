@@ -10,7 +10,9 @@ if not mt5.login(login,password,server) :
     print("nope")
 
 
+prix = mt5.symbol_info("BTCUSD")
 
+print(prix)
 position = mt5.positions_get()[-1].ticket
 print(position)
 volume = mt5.positions_get()[0].volume
@@ -31,7 +33,6 @@ orders = {
     "position"  : position
 }
 
-prix = mt5.symbol_info("BTCUSD").ask
-print(prix)
+
 #print(mt5.order_send(orders))
 mt5.order_send(orders)

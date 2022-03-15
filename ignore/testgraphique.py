@@ -17,10 +17,7 @@ class Myapp :
         self.connexion_frame()
         self.frame_welcome.pack(expand = YES) 
         # initialisation des frames de l'onglet "bots"
-        self.bots_frame_1 = Frame(self.root,bg="#4A4A4A")
-        self.bots_frame_2 = Frame(self.root,bg="#4A4A4A")
-        self.bots_frame_3 = Frame(self.root,bg="#4A4A4A")
-        self.bots_frame_4 = Frame(self.root,bg="#4A4A4A")
+        self.bot_frame = Frame(self.root,bg="#4A4A4A")
 
 
     def menu_bar(self) :
@@ -74,20 +71,22 @@ class Myapp :
                 self.hide_frames()
                 self.bots_frame()
 
-    def bots_frame(self) :
-        label_title1 = Label(self.bots_frame_1,text="Veuillez choisir une ou plusieurs stratégies. \n Pour obtenir plus d'informations sur les stratégies mis en place, allez dans l'onglet Stratégies ", font =("Courrier",15),bg= "#4A4A4A",fg='white' )
-
-        
-        label_strat = Label(self.bots_frame_1,text="Stratégie :", font=("Courrier", 10), bg = "#252424", fg = 'white')
-        stratEntry = Entry(self.bots_frame_1,width= 25)
-        label_vol = Label(self.bots_frame_1,text="Montant :", font=("Courrier", 10), bg = "#252424", fg = 'white')
-        volEntry = Entry(self.bots_frame_1,width= 25)
-        label_actif = Label(self.bots_frame_1,text="L'actif :", font=("Courrier", 10), bg = "#252424", fg = 'white')
-        actifEntry = Entry(self.bots_frame_1,width= 25) 
-        runButton = Button(self.bots_frame_1,text = "RUN",bg="#54B22E",fg ='white') 
-        
-        label_title2 = Label(self.bots_frame_2,text="Veuillez choisir un bot actif que vous voulez arrêter (STOP ALL termine tous les bots) :", font =("Courrier",15),bg= "#4A4A4A",fg='white' )
-
+    def bots_frame(self) :        
+        # Création du texte et des boutons
+        label_title1 = Label(self.bot_frame,text="Veuillez choisir une ou plusieurs stratégies. \n Pour obtenir plus d'informations sur les stratégies mis en place, allez dans l'onglet Stratégies ", font =("Courrier",15),bg= "#4A4A4A",fg='white' )
+        label_strat = Label(self.bot_frame,text="Stratégie :", font=("Courrier", 10), bg = "#252424", fg = 'white')
+        stratEntry = Entry(self.bot_frame,width= 25)
+        label_vol = Label(self.bot_frame,text="Montant :", font=("Courrier", 10), bg = "#252424", fg = 'white')
+        volEntry = Entry(self.bot_frame,width= 25)
+        label_actif = Label(self.bot_frame,text="L'actif :", font=("Courrier", 10), bg = "#252424", fg = 'white')
+        actifEntry = Entry(self.bot_frame,width= 25) 
+        runButton = Button(self.bot_frame,text = "RUN",bg="#54B22E",fg ='white') 
+        label_title2 = Label(self.bot_frame,text="Veuillez choisir un bot actif que vous voulez arrêter (STOP ALL termine tous les bots) :", font =("Courrier",15),bg= "#4A4A4A",fg='white' )
+        label_tokill = Label(self.bot_frame, text="Indiquez la stratégie que vous voulez arrêtez",font=("Courrier", 10), bg = "#252424", fg = 'white')
+        tokillEntry = Entry(self.bot_frame,width= 25)
+        kill_allButton = Button(self.bot_frame,text = "KILL ALL",bg="#DB1E00",fg ='white')
+        killButton = Button(self.bot_frame,text = "KILL",bg="#DB1E00",fg ='white',width=6)
+        # Affichage de la frame 
         label_title1.pack(side = TOP)
         label_strat.pack(pady=3)
         stratEntry.pack(pady=3)
@@ -97,18 +96,11 @@ class Myapp :
         actifEntry.pack(pady=3)
         runButton.pack()
         label_title2.pack()
-        self.bots_frame_1.pack(expand=YES)
-        self.bots_frame_2.pack(expand=YES)
-
-
-
-
-
-
-
-
-
-
+        label_tokill.pack()
+        tokillEntry.pack()
+        killButton.pack()
+        kill_allButton.pack()
+        self.bot_frame.pack(expand = YES )
 
 
 test = Myapp()

@@ -2,6 +2,7 @@ import yfinance as yf
 import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt 
+import MetaTrader5 as mt5 
 
 def ydataframe(stock : str, start : str , interval : str ) -> pd.DataFrame :
     # ""
@@ -49,6 +50,16 @@ def addkey(orders, position : int) :
     #""
     orders['position'] = position
     return position
+
+def money_to_volume(market: str, money : float) -> float :
+    #""
+    # Permet de convertir un nombre float représentant l'argent que l'on souhaite placer dans un actif en volume. Dans orders, Mt5 ne comprend
+    # que 'volume' pour connaître le montant à placer dans une opération, or volume dépend du prix de l'actif mis en jeu. Si on veut placer 
+    # 2000 euros sans se soucier de combien ça représente en volume de l'actif, on utilise cette fonction. 
+    #""
+    prix_1market = mt5.symbol_info_tick(market).ask
+    return round(money/prix_1market,2)
+
 
 
 
