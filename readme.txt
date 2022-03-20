@@ -1,9 +1,10 @@
 Truc qui reste à faire :
 1)
-- Tout commenter ... :(
+- Tout commenter ... :( ==> FAIT
 - Faire en sorte que lorsqu'on kill un bot, on close la dernière opération si elle est toujours ouverte. Pour ça,
 dans la méthode kill : si jamais il y a encore une position sur l'actif du bot en question (l'objet instancié), alors
 on la ferme. 
+- Mettre un message d'erreur lorsque on indique des identifiants incorrect.
 - faire fonctionner le bouton kill : L'utilisateur indique le nom de la stratégie et le market où la strat est utilisé.
 Puis on cherche dans pill2kill l'objet en question et on le tue là brrrr brrr
 - Rendre le menu naviguable : dès qu'on appuie sur un menu, on hide les frames et on display la bonne frame 
