@@ -1,3 +1,4 @@
+from pyparsing import col
 import yfinance as yf 
 import numpy as np
 import pandas as pd 
@@ -21,19 +22,49 @@ def ema(data, length : str, column : str ) -> pd.DataFrame :
     #rajoute la colonne des ema d'une colonne. L'ema se calcul sur length unités. Renvoie une dataframe.
     #""
     data[str(length) + "EMA_" + column] = data[column].ewm(span = length , adjust = False).mean()
-    return data
 
 def sma(data,length : str, column : str) -> pd.DataFrame:
     #""
     #rajoute la colonne des sma d'une colonne. Le sma se calcul sur length unités. Renvoie une dataframe.
     #""    
-    data[str(length) + "SMA_" + column] = data[column].rolling(window=length).mean() 
+    data[str(length) + "SMA_" + column] = data[column].rolling(window=length).mean()
 
 def std(data, length : int, column : str) -> pd.DataFrame:
     #""
     #rajoute la colonne des std d'une colonne. Le std se calcul sur length unité. Renvoie une dataframe.
     #""
     data[str(length) + "STD_" + column] = data[column].rolling(window=length).std()
+
+def zscore(data, length : int, column : str) -> pd.DataFrame:
+    #""
+    #rajoute la colonne des zscore d'une colonne. Le zscore se calcul sur le length unité. Renvoie une datafram
+    #Le zscore se calcul en trois étapes
+    #""
+    sma(data,length, column)
+    displacement = data[column] - data[str(length) + "SMA_" + column]
+    std(data, length, column)
+    data[str(length) + "Zscore_" + column] = displacement.divide(data[str(length) + "STD_" + column])
+
+def quantile(data, length : int, column : str, q : int) -> pd.DataFrame:
+    #""
+    #rajoute la colonne des quantile d'une colonne. Le quantile se calcul sur length unité. Renvoie une dataframe.
+    #""
+    data[str(length) + "QUANT_" + str(q) + "_" + column] = data[column].rolling(window = length).quantile(q)
+def variation(data, variationrange : int, column : str) -> pd.DataFrame:
+    #""
+    #Calcule la colonne des valeurs absolues des variations par rapport à une valeur précédente d'une colonne. 
+    #Renvoie une dataframe consitué d'une unique colonne qui contient les variations.
+    #""
+    intermediarydataframe = data[column].iloc[variationrange:].reset_index(drop = True)
+    return (data[column] - intermediarydataframe).abs()
+
+def smoothaveragerange(data, column : str, fastperiod : float, fastrange : float) -> pd.DataFrame:
+        wper = fastperiod*2 - 1
+        smr = variation(data, 1, column).ewm(span =  fastperiod , adjust = False).mean()
+
+        return smr.ewm(span = wper, adjust = False).mean()*fastrange
+
+  
 
 def removekey(orders) : 
     #""
