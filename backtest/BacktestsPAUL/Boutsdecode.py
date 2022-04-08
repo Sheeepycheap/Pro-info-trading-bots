@@ -17,6 +17,8 @@ import numpy as np
 from datetime import *
 from math import *
 from decimal import *
+from Indicateursbacktest import *
+import Indicateursbacktest as ind
 #get unix TIME
 #On va faire ça avec l'api binance
 api_key = '0W0NnouXJG5kHRuvjm7AcZNOSYxHHPmNWItts8ZUWcIp9aQv4QyCKUa1EbRTE4Iw'
@@ -35,7 +37,15 @@ def dataframe(filename,timeframe, Starttime,backtest):
         timeframe =  client.KLINE_INTERVAL_5MINUTE
     elif timeframe == '1m':
         timeframe = client.KLINE_INTERVAL_1MINUTE
-    klines = client.get_historical_klines("BTCUSDT", timeframe, Starttime)
+    elif timeframe == '15m':
+        timeframe = client.KLINE_INTERVAL_15MINUTE
+    elif timeframe == '1h':
+        timeframe = client.KLINE_INTERVAL_1HOUR
+    elif timeframe == '2h':
+        timeframe = client.KLINE_INTERVAL_2HOUR
+    elif timeframe == '1d':
+        timeframe = client.KLINE_INTERVAL_1DAY
+    klines = client.get_historical_klines("AVAXUSDT", timeframe, Starttime)
     L = []
     Ldates = []
     for k in klines:
@@ -110,14 +120,14 @@ def CurrentzscoreMA(dataframe,length, backtest, indice):
 
 # file = open('dataframe6mois.json')
 
-# dataframe = dataframe('dataframe6mois1m.pkl','1m', 1629756000000,'True')
 
 
-
-dataframe6mois1m = pd.read_pickle("./dataframe6mois1m.pkl")
+# dataframe6mois1m = pd.read_pickle("./dataframe6mois1m.pkl")
 dataframe6mois5m = pd.read_pickle("./dataframe6mois5m.pkl")
 
-dataframe6mois5m.plot(y = 'price', use_index = True)
+
+# dataframe6mois5m.plot(y = 'price', use_index = True)
+# dataframe6mois1m.plot(y = 'price', use_index = True)
 
 
  
@@ -133,28 +143,6 @@ dataframe6mois5m.plot(y = 'price', use_index = True)
 # print(dataframe6mois5m.iloc[-20:])
 # entryTime = datetime.utcfromtimestamp(entryTimestamp).strftime('%Y-%m-%d %H:%M:%S')
 # index = dataframe6mois5m.loc[dataframe6mois5m['date'] == 	1633057200,'price'].index[0]
-def createrangefilter(data1, data2, indice) -> pd.DataFrame:
-    #""
-    #Range filter. 
-    #Creation de la colonne rangefilter à partir du reste on parcourt toute la bdd de base
-    #On ajoute les valeurs à chaque ligne comme si on fesait du live trading
-    #""
-    # print(str(indice) + ' ' + str(rngfilt))
-
-    #On initialise le rangefilter
-    rangefilter = pd.Dataframe({'rngfilter' : [0]})
-    for k in range(len(data1.index)):
-        if data1.loc[k,'price'] > rangefilter.iloc[-1,0] :
-            if data1.loc[k,'price'] - data2.loc[k] < rangefilter.iloc[-1,0]:
-                rangefilter.loc[rangefilter.shape[0]] = rangefilter.iloc[-1,0]
-            else:
-                rangefilter.loc[rangefilter.shape[0]] = data1.loc[k,'price'] - data2.loc[k]
-        else : 
-            if data1.loc[k,'price'] + data2.loc[k] > rangefilter.iloc[-1,0]:
-                rangefilter.loc[rangefilter.shape[0]] = rangefilter.iloc[-1,0]
-            else :
-                rangefilter.loc[rangefilter.shape[0]] = data1.loc[k,'price'] + data2.loc[k]
-    data1["Range_filter"] = rangefilter
 
 plt.show()
 # outTime = datetime.utcfromtimestamp(dataframe6mois1m.loc[index,'date']).strftime('%Y-%m-%d %H:%M:%S')
@@ -174,7 +162,7 @@ plt.show()
 # print(dataframe6mois1m.iloc[-200:-150])
 # print(dataframe6mois5m.iloc[-4:])
 # print(datetime.utcfromtimestamp(1639460000 ).strftime('%Y-%m-%d %H:%M:%S'))
-# print(datetime.utcfromtimestamp((len(dataframe6mois)-30000)*300 +1629756000 ).strftime('%Y-%m-%d %H:%M:%S'))
+print(datetime.utcfromtimestamp(dataframe6mois5m.iloc[-1,'date']).strftime('%Y-%m-%d %H:%M:%S'))
 # L = np.linspace(0,200,200)
 # Lzscore = []
 # LzscoreMA = []
