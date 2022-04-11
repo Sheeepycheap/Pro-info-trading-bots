@@ -17,7 +17,6 @@ import numpy as np
 from datetime import *
 from math import *
 from decimal import *
-from Indicateursbacktest import *
 import Indicateursbacktest as ind
 #get unix TIME
 #On va faire ça avec l'api binance
@@ -28,11 +27,9 @@ client = Client(api_key, api_secret)
 # info = client.get_account_snapshot(type='SPOT')
 # for infos in info['snapshotVos'][0]['data']['balances']:
 #     print(infos)
-def dataframe(filename,timeframe, Starttime,backtest):
+def dataframe(filename, timeframe : str, Starttime : int ,backtest : bool, pair : str):
     #fonction qui renvoit la data depuis le temps spécifié
     #pour prendre les datas et faire moins de calcul (ou pas) ca doit etre possible d'actualiser que les datas qui sont nouvelles
-    #Je vais faire ca dans une fonction (toutes les 5 min on appel l'autre pute une fois sur une data et on met à jour le doc des datas)
-    #Les étapes c'est début du prog on initialise le doc après open supprimer derniere et ajouter premiere (very easy)
     if timeframe == '5m':
         timeframe =  client.KLINE_INTERVAL_5MINUTE
     elif timeframe == '1m':
@@ -43,29 +40,35 @@ def dataframe(filename,timeframe, Starttime,backtest):
         timeframe = client.KLINE_INTERVAL_1HOUR
     elif timeframe == '2h':
         timeframe = client.KLINE_INTERVAL_2HOUR
+    elif timeframe == '4h':
+        timeframe = client.KLINE_INTERVAL_4HOUR
     elif timeframe == '1d':
         timeframe = client.KLINE_INTERVAL_1DAY
-    klines = client.get_historical_klines("AVAXUSDT", timeframe, Starttime)
-    L = []
+    klines = client.get_historical_klines(pair, timeframe, Starttime)
+    Lopen = []
+    Lhigh = []
+    Llow = []
+    Lclose = []
     Ldates = []
     for k in klines:
-        L.append(float(k[4]))
-        Ldates.append(int(k[0])/1000)
+        Lopen.append(float(k[1])) #Open
+        Lhigh.append(float(k[2])) #High
+        Llow.append(float(k[3])) #Low
+        Lclose.append(float(k[4])) #Close
+        Ldates.append(int(k[0]/1000))
 
-    d = {'date': Ldates, 'price' : L }
+    d = {'date': Ldates, 'open' : Lopen, 'high' : Lhigh, 'low' : Llow, 'price' : Lclose}
     # with open('recentdata.json','w+') as doc:
     #     json.dump(d, doc)
     df = pd.DataFrame(d)
     dataframe = df.reset_index(drop = True)
-    useddataframe = dataframe.loc[:,'price']
-    dataframezscoreMA = CurrentzscoreMA(useddataframe,20, 'True', 0)[1]\
-            .reset_index(name="zscoreMA")
-    zscore = Zscore(useddataframe,20, 'True',0)[1]\
-            .reset_index(name="zscore")
+    ind.PSAR(dataframe)
+    ind.MACD(dataframe, "price")
+    ind.zscore(dataframe, 20, "price")
+    ind.sma(dataframe,20, '20Zscore_price')
+    # dataframe = dataframe.drop(labels = 'index',axis = 1)
 
-    dataframe = pd.concat([dataframe,zscore, dataframezscoreMA], axis=1)
-    dataframe = dataframe.drop(labels = 'index',axis = 1)
-    if backtest == 'True':
+    if backtest:
         dataframe.to_pickle(filename)  
     return dataframe
 
@@ -116,35 +119,23 @@ def CurrentzscoreMA(dataframe,length, backtest, indice):
         zScoreMA = Zscore(dataframe,length, backtest, indice)[1].rolling(length).mean()
         currentZscoreMA = zScoreMA.iloc[-1]
         return currentZscoreMA, zScoreMA
+
 # def zranklo = 
 
 # file = open('dataframe6mois.json')
 
 
 
-# dataframe6mois1m = pd.read_pickle("./dataframe6mois1m.pkl")
 dataframe6mois5m = pd.read_pickle("./dataframe6mois5m.pkl")
 
+# dataframe6mois4hBTC = dataframe('dataframe6mois4hBTC', '4h', 1629756000000, True, 'BTCUSDT')
+dataframe6mois4hBTC = pd.read_pickle('./dataframe6mois4hBTC')
 
 # dataframe6mois5m.plot(y = 'price', use_index = True)
 # dataframe6mois1m.plot(y = 'price', use_index = True)
 
 
- 
 
-# entryTimestamp = dataframe6mois5m.loc[0,'date']
-
-# dataframe = pd.read_pickle("./dataframe6mois5m.pkl")
-# MA20 = MA(dataframe6mois5m.loc[:,'price'],20)\
-#             .reset_index(name="MA20")
-# dataframe = pd.concat([dataframe6mois5m,MA20], axis=1)
-# dataframe = dataframe.drop(labels = 'index', axis = 1)
-# dataframe.to_pickle("./dataframe6mois5m.pkl") 
-# print(dataframe6mois5m.iloc[-20:])
-# entryTime = datetime.utcfromtimestamp(entryTimestamp).strftime('%Y-%m-%d %H:%M:%S')
-# index = dataframe6mois5m.loc[dataframe6mois5m['date'] == 	1633057200,'price'].index[0]
-
-plt.show()
 # outTime = datetime.utcfromtimestamp(dataframe6mois1m.loc[index,'date']).strftime('%Y-%m-%d %H:%M:%S')
 # otherindex = dataframe6mois5m.loc[dataframe6mois5m['date'] == entryTimestamp,'price'].index[0]
 # currentPrice1m = dataframe6mois1m.loc[index+4,'price']
@@ -162,20 +153,14 @@ plt.show()
 # print(dataframe6mois1m.iloc[-200:-150])
 # print(dataframe6mois5m.iloc[-4:])
 # print(datetime.utcfromtimestamp(1639460000 ).strftime('%Y-%m-%d %H:%M:%S'))
-print(datetime.utcfromtimestamp(dataframe6mois5m.iloc[-1,'date']).strftime('%Y-%m-%d %H:%M:%S'))
+print(dataframe6mois4hBTC.loc[:,'PSAR'])
+
 # L = np.linspace(0,200,200)
 # Lzscore = []
 # LzscoreMA = []
 # L3 = []
 # Lprice = []
-# for k in range(0,200):
-#     Lzscore.append(dataframe6mois.loc[len(dataframe6mois)-k-1,'zscore'])
-#     LzscoreMA.append(dataframe6mois.loc[len(dataframe6mois)-k-1,'zscoreMA'])
-#     Lprice.append(dataframe6mois.loc[len(dataframe6mois)-k-1,'price'])
-#     L3.append(3)
-# Lzscore.reverse()
-# LzscoreMA.reverse()
-# Lprice.reverse()
+
 
 # fig, (ax1, ax2) = plt.subplots(2)
 # fig.suptitle('Vertically stacked subplots')
@@ -185,4 +170,3 @@ print(datetime.utcfromtimestamp(dataframe6mois5m.iloc[-1,'date']).strftime('%Y-%
 # ax2.plot(L, Lprice)
 # plt.show()
 # fig, (ax1, ax2) = plt.subplots(2)
-
