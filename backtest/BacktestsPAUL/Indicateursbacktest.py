@@ -91,6 +91,75 @@ def money_to_volume(market: str, money : float) -> float :
     prix_1market = mt5.symbol_info_tick(market).ask
     return round(money/prix_1market,2)
 
+def SAR(data):
+    #""
+    #rajoute la colonne des sar d'une colonne. L'ema se calcul sur length unités. Renvoie une dataframe.
+    #Pour cela on va avoir besoin de la colonner des AF (acceleration factor) qui sont des valeurs permettant de juger l'évolution
+    #de la tendance AF0 = 0.02 et si on fait un nouveau plus haut (resp plus bas) alors AF += 0.02 et max(AF) = 0.2
+    #EP = extreme point, le plus haut (resp plus bas) de la tendance actuelle
+    #On calcul le SAR à temps N avec la formule de récurence suivante: 
+    #SARn = SAR(n-1) + AF(n-1)*(EP(n-1) - SAR(n-1)) sachant que SAR(0) = 1 er high (resp low) de la tendance haussière (resp baissière)
+    #""
+    data['AF'] = np.nan
+    data['PSAR'] = np.nan
+    data['EP'] = np.nan
+    data['PSARdir'] = np.nan
+
+    data.loc[0, 'AF'] = 0.02
+    data.loc[0, 'PSAR'] = data.loc[0, 'low']
+    data.loc[0, 'EP'] = data.loc[0, 'high']
+    data.loc[0, 'PSARdir'] = "uptrend"
+
+    for a in range(1, len(data)):
+
+        if data.loc[a-1, 'PSARdir'] == 'uptrend':
+
+            data.loc[a, 'PSAR'] = data.loc[a-1, 'PSAR'] + (data.loc[a-1, 'AF']*(data.loc[a-1, 'PSAR']-data.loc[a-1, 'EP']))            
+
+            data.loc[a, 'PSARdir'] = "uptrend"
+
+            if data.loc[a, 'low'] < data.loc[a-1, 'PSAR']:
+                data.loc[a, 'PSARdir'] = "bear"
+                data.loc[a, 'PSAR'] = data.loc[a-1, 'EP']
+                data.loc[a, 'EP'] = data.loc[a-1, 'low']
+                data.loc[a, 'AF'] = .02
+
+            else:
+                if data.loc[a, 'high'] > data.loc[a-1, 'EP']:
+                    data.loc[a, 'EP'] = data.loc[a, 'high']
+                    if data.loc[a-1, 'AF'] <= 0.18:
+                        data.loc[a, 'AF'] =data.loc[a-1, 'AF'] + 0.02
+                    else:
+                        data.loc[a, 'AF'] = data.loc[a-1, 'AF']
+                elif data.loc[a, 'high'] <= data.loc[a-1, 'EP']:
+                    data.loc[a, 'AF'] = data.loc[a-1, 'AF']
+                    data.loc[a, 'EP'] = data.loc[a-1, 'EP']               
+
+
+
+        elif data.loc[a-1, 'PSARdir'] == 'bear':
+
+            data.loc[a, 'PSAR'] = data.loc[a-1, 'PSAR'] - (data.loc[a-1, 'AF']*(data.loc[a-1, 'PSAR']-data.loc[a-1, 'EP']))
+
+            data.loc[a, 'PSARdir'] = "bear"
+
+            if data.loc[a, 'high'] > data.loc[a-1, 'PSAR']:
+                data.loc[a, 'PSARdir'] = "uptrend"
+                data.loc[a, 'PSAR'] = data.loc[a-1, 'EP']
+                data.loc[a, 'EP'] = data.loc[a-1, 'high']
+                data.loc[a, 'AF'] = .02
+
+            else:
+                if data.loc[a, 'low'] < data.loc[a-1, 'EP']:
+                    data.loc[a, 'EP'] = data.loc[a, 'low']
+                    if data.loc[a-1, 'AF'] <= 0.18:
+                        data.loc[a, 'AF'] = data.loc[a-1, 'AF'] + 0.02
+                    else:
+                        data.loc[a, 'AF'] = data.loc[a-1, 'AF']
+
+                elif data.loc[a, 'low'] >= data.loc[a-1, 'EP']:
+                    data.loc[a, 'AF'] = data.loc[a-1, 'AF']
+                    data.loc[a, 'EP'] = data.loc[a-1, 'EP']           
 
 
 
