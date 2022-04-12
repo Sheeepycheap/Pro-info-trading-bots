@@ -17,13 +17,13 @@ def ydataframe(stock : str, start : str , interval : str ) -> pd.DataFrame :
     df.dropna(inplace=True)
     return df
 
-def ema(data, length : str, column : str ) -> pd.DataFrame :
+def ema(data, length : int, column : str ) -> pd.DataFrame :
     #""
     #rajoute la colonne des ema d'une colonne. L'ema se calcul sur length unités. Renvoie une dataframe.
     #""
     data[str(length) + "EMA_" + column] = data[column].ewm(span = length , adjust = False).mean()
 
-def sma(data,length : str, column : str) -> pd.DataFrame:
+def sma(data,length : int, column : str) -> pd.DataFrame:
     #""
     #rajoute la colonne des sma d'une colonne. Le sma se calcul sur length unités. Renvoie une dataframe.
     #""    
@@ -98,72 +98,7 @@ def money_to_volume(market: str, money : float) -> float :
     prix_1market = mt5.symbol_info_tick(market).ask
     return round(money/prix_1market,2)
 
-# def SAR(data):
-
-
-
-
-
-#     data['AF'] = np.nan
-#     data['PSAR'] = np.nan
-#     data['EP'] = np.nan
-#     data['PSARdir'] = np.nan
-
-#     data.loc[0, 'AF'] = 0.02
-#     data.loc[0, 'PSAR'] = data.loc[0, 'low']
-#     data.loc[0, 'EP'] = data.loc[0, 'high']
-#     data.loc[0, 'PSARdir'] = "uptrend"
-
-#     for a in range(1, len(data)):
-
-#         if data.loc[a-1, 'PSARdir'] == 'uptrend':
-
-#             data.loc[a, 'PSAR'] = data.loc[a-1, 'PSAR'] + (data.loc[a-1, 'AF']*(data.loc[a-1, 'PSAR']-data.loc[a-1, 'EP']))            
-
-#             data.loc[a, 'PSARdir'] = "uptrend"
-
-#             if data.loc[a, 'low'] < data.loc[a-1, 'PSAR']:
-#                 data.loc[a, 'PSARdir'] = "bear"
-#                 data.loc[a, 'PSAR'] = data.loc[a-1, 'EP']
-#                 data.loc[a, 'EP'] = data.loc[a-1, 'low']
-#                 data.loc[a, 'AF'] = .02
-
-#             else:
-#                 if data.loc[a, 'high'] > data.loc[a-1, 'EP']:
-#                     data.loc[a, 'EP'] = data.loc[a, 'high']
-#                     if data.loc[a-1, 'AF'] <= 0.18:
-#                         data.loc[a, 'AF'] =data.loc[a-1, 'AF'] + 0.02
-#                     else:
-#                         data.loc[a, 'AF'] = data.loc[a-1, 'AF']
-#                 elif data.loc[a, 'high'] <= data.loc[a-1, 'EP']:
-#                     data.loc[a, 'AF'] = data.loc[a-1, 'AF']
-#                     data.loc[a, 'EP'] = data.loc[a-1, 'EP']               
-
-
-
-#         elif data.loc[a-1, 'PSARdir'] == 'bear':
-
-#             data.loc[a, 'PSAR'] = data.loc[a-1, 'PSAR'] - (data.loc[a-1, 'AF']*(data.loc[a-1, 'PSAR']-data.loc[a-1, 'EP']))
-
-#             data.loc[a, 'PSARdir'] = "bear"
-
-#             if data.loc[a, 'high'] > data.loc[a-1, 'PSAR']:
-#                 data.loc[a, 'PSARdir'] = "uptrend"
-#                 data.loc[a, 'PSAR'] = data.loc[a-1, 'EP']
-#                 data.loc[a, 'EP'] = data.loc[a-1, 'high']
-#                 data.loc[a, 'AF'] = .02
-
-#             else:
-#                 if data.loc[a, 'low'] < data.loc[a-1, 'EP']:
-#                     data.loc[a, 'EP'] = data.loc[a, 'low']
-#                     if data.loc[a-1, 'AF'] <= 0.18:
-#                         data.loc[a, 'AF'] = data.loc[a-1, 'AF'] + 0.02
-#                     else:
-#                         data.loc[a, 'AF'] = data.loc[a-1, 'AF']
-
-#                 elif data.loc[a, 'low'] >= data.loc[a-1, 'EP']:
-#                     data.loc[a, 'AF'] = data.loc[a-1, 'AF']
-#                     data.loc[a, 'EP'] = data.loc[a-1, 'EP']           
+      
 def PSAR(df, af=0.02, max=0.2):
     #""
     #rajoute la colonne des sar d'une colonne. L'ema se calcul sur length unités. Renvoie une dataframe.
@@ -225,8 +160,10 @@ def PSAR(df, af=0.02, max=0.2):
                     df.loc[a, 'AF'] = df.loc[a-1, 'AF']
                     df.loc[a, 'EP'] = df.loc[a-1, 'EP']
 
-def MACD(data, column):
-    data["MACD"] = data[column].ewm(span = 12 , adjust = False).mean() - data[column].ewm(span = 26 , adjust = False).mean()
+def MACD(data : pd.DataFrame, column : str):
+
+    dataMACD = data[column].ewm(span = 12 , adjust = False).mean() - data[column].ewm(span = 26 , adjust = False).mean()
+    data["MACD"] = dataMACD - dataMACD.ewm(span = 9 , adjust = False).mean()
 
 
 

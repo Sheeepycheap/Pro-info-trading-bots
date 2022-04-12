@@ -90,4 +90,4 @@ async def main(filename,backtest,start,end):
 # fin = int(input("indice de fin, doit être supérieur à indice de début : "))
 # asyncio.run(main(a,b,debut,fin))
 
-asyncio.run(main('essai1.json' ,'True',60000,60960))
+asyncio.run(main('essai1.json' ,'True',100,60960))

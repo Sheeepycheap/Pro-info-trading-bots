@@ -63,74 +63,22 @@ def dataframe(filename, timeframe : str, Starttime : int ,backtest : bool, pair 
     df = pd.DataFrame(d)
     dataframe = df.reset_index(drop = True)
     ind.PSAR(dataframe)
-    ind.MACD(dataframe, "price")
     ind.zscore(dataframe, 20, "price")
     ind.sma(dataframe,20, '20Zscore_price')
+    ind.MACD(dataframe, 'price')
     # dataframe = dataframe.drop(labels = 'index',axis = 1)
 
     if backtest:
         dataframe.to_pickle(filename)  
     return dataframe
 
-def realstd(dataframe,length,backtest):
-    #Il faut que la dataframe que l'on passe à l'intérieur soit une seule colonne. On nous renverra une seule colonne aussi.
-    #Si on passe une dataframe avec plusieurs colonnes on nous renvoit un dataframe avec plusieurs colonnes à la fin
-    #Et le std calculé sur toutes les colonnes.
-    if backtest == 'True':
-        std = dataframe.rolling(length,0).std()
-        return std
-    else:
-        std = dataframe.rolling(length,0).std()
-        std = std.iloc[-20]
-        return std
-
-
-def std(dataframe,length):
-    return dataframe.rolling(length).std()['colonne1']
-
-def MA(dataframe,length):
-    return dataframe.rolling(length).mean()
-
-def Zscore(dataframe,length, backtest,indice):
-    #Return Currentzscore, zscoredataframe
-    #Ici on est obligé de mettre qu'une seule colonne en entrée sinon on applique le calcul sur toutes les colonnes ce quui
-    #Indice pas nécéssaire au niveau du live trading
-    #N'est pas intéréssant
-    if backtest == 'True':
-        displacement = dataframe - MA(dataframe,length)
-        displacement = displacement.reset_index(drop = True)
-        zScore = displacement.divide(realstd(dataframe,length, backtest))
-        currentZscore = zScore.iloc[indice]
-        return currentZscore, zScore
-    else:
-        displacement = dataframe - MA(dataframe,length)
-        displacement = displacement.iloc[-length:]
-        displacement = displacement.reset_index(drop = True)
-        zScore = displacement.divide(realstd(dataframe,length, backtest))
-        currentZscore = zScore.iloc[-1]
-        return currentZscore, zScore
-
-def CurrentzscoreMA(dataframe,length, backtest, indice):
-    if backtest == 'True':
-        zScoreMA = Zscore(dataframe,length, backtest, indice)[1].rolling(length).mean()
-        currentZscoreMA = zScoreMA.iloc[indice]
-        return currentZscoreMA, zScoreMA
-    else:
-        zScoreMA = Zscore(dataframe,length, backtest, indice)[1].rolling(length).mean()
-        currentZscoreMA = zScoreMA.iloc[-1]
-        return currentZscoreMA, zScoreMA
-
-# def zranklo = 
-
-# file = open('dataframe6mois.json')
-
 
 
 dataframe6mois5m = pd.read_pickle("./dataframe6mois5m.pkl")
 
-# dataframe6mois4hBTC = dataframe('dataframe6mois4hBTC', '4h', 1629756000000, True, 'BTCUSDT')
-dataframe6mois4hBTC = pd.read_pickle('./dataframe6mois4hBTC')
-
+dataframe6mois4hBTC = dataframe('dataframe6mois4hBTC', '4h', 1629756000000, True, 'BTCUSDT')
+# dataframe6mois4hBTC = pd.read_pickle('./dataframe6mois4hBTC')
+dataframe6mois4hBTC.to_pickle('./dataframe6mois4hBTC')
 # dataframe6mois5m.plot(y = 'price', use_index = True)
 # dataframe6mois1m.plot(y = 'price', use_index = True)
 
@@ -153,7 +101,7 @@ dataframe6mois4hBTC = pd.read_pickle('./dataframe6mois4hBTC')
 # print(dataframe6mois1m.iloc[-200:-150])
 # print(dataframe6mois5m.iloc[-4:])
 # print(datetime.utcfromtimestamp(1639460000 ).strftime('%Y-%m-%d %H:%M:%S'))
-print(dataframe6mois4hBTC.loc[:,'PSAR'])
+print(dataframe6mois4hBTC.loc[:,'MACD'])
 
 # L = np.linspace(0,200,200)
 # Lzscore = []
