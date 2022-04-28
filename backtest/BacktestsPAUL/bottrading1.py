@@ -23,83 +23,7 @@ api_secret = 'NmW0ruph3E8qvg5c9c9ngEgukPVkHKCHYBPE27ZB8UBtD7kvI79JiWQDU7SXbwrF'
 client = Client(api_key, api_secret)
 
 
-def dataframe(filename,timeframe, Starttime,backtest):
-    #fonction qui renvoit la data depuis le temps spécifié
-    #pour prendre les datas et faire moins de calcul (ou pas) ca doit etre possible d'actualiser que les datas qui sont nouvelles
-    #Je vais faire ca dans une fonction (toutes les 5 min on appel l'autre pute une fois sur une data et on met à jour le doc des datas)
-    #Les étapes c'est début du prog on initialise le doc après open supprimer derniere et ajouter premiere (very easy)
-    if timeframe == '5m':
-        timeframe =  client.KLINE_INTERVAL_5MINUTE
-    elif timeframe == '1m':
-        timeframe = client.KLINE_INTERVAL_1MINUTE
-    klines = client.get_historical_klines("BTCUSDT", timeframe, Starttime)
-    L = []
-    Ldates = []
-    for k in klines:
-        L.append(float(k[4]))
-        Ldates.append(int(k[0])/1000)
 
-    d = {'date': Ldates, 'price' : L }
-    # with open('recentdata.json','w+') as doc:
-    #     json.dump(d, doc)
-    df = pd.DataFrame(d)
-    dataframe = df.reset_index(drop = True)
-    useddataframe = dataframe.loc[:,'price']
-    dataframezscoreMA = CurrentzscoreMA(useddataframe,20, 'True', 0)[1]\
-            .reset_index(name="zscoreMA")
-    zscore = Zscore(useddataframe,20, 'True',0)[1]\
-            .reset_index(name="zscore")
-
-    dataframe = pd.concat([dataframe,zscore, dataframezscoreMA], axis=1)
-    dataframe = dataframe.drop(labels = 'index',axis = 1)
-    if backtest == True:
-        dataframe.to_pickle(filename)  
-    return dataframe
-
-def realstd(dataframe,length,backtest):
-    #Il faut que la dataframe que l'on passe à l'intérieur soit une seule colonne. On nous renverra une seule colonne aussi.
-    #Si on passe une dataframe avec plusieurs colonnes on nous renvoit un dataframe avec plusieurs colonnes à la fin
-    #Et le std calculé sur toutes les colonnes.
-    if backtest == 'True':
-        std = dataframe.rolling(length,0).std()
-        return std
-    else:
-        std = dataframe.rolling(length,0).std()
-        std = std.iloc[-20]
-        return std
-
-
-def MA(dataframe,length):
-    return dataframe.rolling(length).mean()
-
-def Zscore(dataframe,length, backtest,indice):
-    #Return Currentzscore, zscoredataframe
-    #Ici on est obligé de mettre qu'une seule colonne en entrée sinon on applique le calcul sur toutes les colonnes ce quui
-    #Indice pas nécéssaire au niveau du live trading
-    #N'est pas intéréssant
-    if backtest == 'True':
-        displacement = dataframe - MA(dataframe,length)
-        displacement = displacement.reset_index(drop = True)
-        zScore = displacement.divide(realstd(dataframe,length, backtest))
-        currentZscore = zScore.iloc[indice]
-        return currentZscore, zScore
-    else:
-        displacement = dataframe - MA(dataframe,length)
-        displacement = displacement.iloc[-length:]
-        displacement = displacement.reset_index(drop = True)
-        zScore = displacement.divide(realstd(dataframe,length, backtest))
-        currentZscore = zScore.iloc[-1]
-        return currentZscore, zScore
-
-def CurrentzscoreMA(dataframe,length, backtest, indice):
-    if backtest == 'True':
-        zScoreMA = Zscore(dataframe,length, backtest, indice)[1].rolling(length).mean()
-        currentZscoreMA = zScoreMA.iloc[indice]
-        return currentZscoreMA, zScoreMA
-    else:
-        zScoreMA = Zscore(dataframe,length, backtest, indice)[1].rolling(length).mean()
-        currentZscoreMA = zScoreMA.iloc[-1]
-        return currentZscoreMA, zScoreMA
 
 
 # dataframe pour 6 mois en 5 miutes pour backtester
@@ -111,8 +35,8 @@ def CurrentzscoreMA(dataframe,length, backtest, indice):
 #     json.dump(klines, e)
 # Pour plot : 
 def plot(x,y1,y2):
-    plt.plot(x, y1, color='r', label='zcore')
-    plt.plot(x, y2, color='g', label='zscoreMA')
+    plt.plot(x, y1, color='r', label='20Zscore_price')
+    plt.plot(x, y2, color='g', label='20SMA_20Zscore_price')
     plt.show()
 
 # zscoreused =  []
@@ -128,8 +52,8 @@ def Selecttime(dataframe,startime, endtime):
     return Lx
 
 
-dataframe6mois5m = pd.read_pickle("./dataframe6mois5m.pkl")
-dataframe6mois1m = pd.read_pickle("./dataframe6mois1m.pkl")
+dataframe6mois5m = pd.read_pickle("./dataframe6mois5mBTC")
+dataframe6mois1m = pd.read_pickle("./dataframe6mois1mBTC")
 
 LCapital = [1000]
 Lprice = []
@@ -154,23 +78,23 @@ async def main(filename,backtest,start,end):
 #Truc habituel en dessous:
 #
         Entryprice = 0
-        LzScore = [dataframe6mois5m.loc[start,'zscore']]
-        LzScoreMA = [dataframe6mois5m.loc[start,'zscoreMA']]
+        LzScore = [dataframe6mois5m.loc[start,'20Zscore_price']]
+        LzScoreMA = [dataframe6mois5m.loc[start,'20SMA_20Zscore_price']]
         Gainmoyentrade = 0 
         Winrate = 0 
-        #Strategie va etre : sell when zscore < currentMA
-        #Close trade when zscore = currentMA
+        #Strategie va etre : sell when 20Zscore_price < currentMA
+        #Close trade when 20Zscore_price = currentMA
         #Pour simuler le short en gain je vais juste faire prix de sortie-prix d'entrée
         k = Decimal(start)
         Bornes = 0
         while k < end:
             k+=Decimal(1)
-            LzScore.append(dataframe6mois5m.loc[int(k),'zscore'])
-            LzScoreMA.append(dataframe6mois5m.loc[int(k),'zscoreMA'])
+            LzScore.append(dataframe6mois5m.loc[int(k),'20Zscore_price'])
+            LzScoreMA.append(dataframe6mois5m.loc[int(k),'20SMA_20Zscore_price'])
             LCapital.append(Capital)
-            if dataframe6mois5m.loc[int(k)-1,'zscore'] >= 2.4 and dataframe6mois5m.loc[int(k),'zscore'] < dataframe6mois5m.loc[int(k) - 1, 'zscore']:
+            if dataframe6mois5m.loc[int(k)-1,'20Zscore_price'] >= 2.4 and dataframe6mois5m.loc[int(k),'20Zscore_price'] < dataframe6mois5m.loc[int(k) - 1, '20Zscore_price']:
                 Bornes = 1
-            if  dataframe6mois5m.loc[int(k)-1,'zscore'] <= -2.4 and dataframe6mois5m.loc[int(k),'zscore'] > dataframe6mois5m.loc[int(k) - 1, 'zscore']:
+            if  dataframe6mois5m.loc[int(k)-1,'20Zscore_price'] <= -2.4 and dataframe6mois5m.loc[int(k),'20Zscore_price'] > dataframe6mois5m.loc[int(k) - 1, '20Zscore_price']:
                 Bornes = -1
                 
             #Short condition
@@ -187,7 +111,7 @@ async def main(filename,backtest,start,end):
                 Lprice.append(dataframe6mois5m.loc[int(k),'price'])
                 enCours = True
                 # while enCours:
-                while dataframe6mois5m.loc[int(k)-1,'zscore'] > -2.4 and k<end or enCours and k< end: #currentZscore1m >= 0
+                while dataframe6mois5m.loc[int(k)-1,'20Zscore_price'] > -2.4 and k<end or enCours and k< end: #currentZscore1m >= 0
                     #ici on passe sur la dataframe une minute
                     #Les données en commun sont la date et l'heure de la mesure donc on va récupérer ca
                     
@@ -196,8 +120,8 @@ async def main(filename,backtest,start,end):
                     Lindex.append(dataframe6mois1m.loc[index,'date'])
                     Lprice.append(dataframe6mois1m.loc[index,'price'])
                     if Decimal(str(k))%1 == 0.0:
-                        # LzScore.append(dataframe6mois5m.loc[int(k),'zscore'])
-                        # LzScoreMA.append(dataframe6mois5m.loc[int(k),'zscoreMA'])
+                        # LzScore.append(dataframe6mois5m.loc[int(k),'20Zscore_price'])
+                        # LzScoreMA.append(dataframe6mois5m.loc[int(k),'20SMA_20Zscore_price'])
                         LCapital.append(Capital)
                     if (Entryprice-dataframe6mois1m.loc[index,'price'])/Entryprice > 0.0165:
                         enCours = False
@@ -220,8 +144,8 @@ async def main(filename,backtest,start,end):
                     json.dump(ClosedTrade, e)
                 if not Decimal(str(k))%1 == 0.0:
                     k = Decimal(ceil(k))
-                    # LzScore.append(dataframe6mois5m.loc[int(k),'zscore'])
-                    # LzScoreMA.append(dataframe6mois5m.loc[int(k),'zscoreMA'])
+                    # LzScore.append(dataframe6mois5m.loc[int(k),'20Zscore_price'])
+                    # LzScoreMA.append(dataframe6mois5m.loc[int(k),'20SMA_20Zscore_price'])
                     LCapital.append(Capital)
 
 # ""
@@ -240,7 +164,7 @@ async def main(filename,backtest,start,end):
             #     Lprice.append(dataframe6mois5m.loc[int(k),'price'])
             #     enCours = True
             #     # while enCours:
-            #     while dataframe6mois5m.loc[int(k)-1,'zscore'] < 2.4 and k<end or enCours: #currentZscore1m >= 0
+            #     while dataframe6mois5m.loc[int(k)-1,'20Zscore_price'] < 2.4 and k<end or enCours: #currentZscore1m >= 0
             #         #ici on passe sur la dataframe une minute
             #         #Les données en commun sont la date et l'heure de la mesure donc on va récupérer ca
                     
@@ -250,8 +174,8 @@ async def main(filename,backtest,start,end):
             #         Lprice.append(dataframe6mois1m.loc[index,'price'])
             #         # print(dataframe6mois1m.loc[index, ['price','date']])
             #         if Decimal(str(k))%1 == 0.0:
-            #             LzScore.append(dataframe6mois5m.loc[int(k),'zscore'])
-            #             LzScoreMA.append(dataframe6mois5m.loc[int(k),'zscoreMA'])
+            #             LzScore.append(dataframe6mois5m.loc[int(k),'20Zscore_price'])
+            #             LzScoreMA.append(dataframe6mois5m.loc[int(k),'20SMA_20Zscore_price'])
             #             LCapital.append(Capital)
             #         if (dataframe6mois1m.loc[index,'price']- Entryprice)/Entryprice > 0.005:
             #             enCours = False
@@ -271,8 +195,8 @@ async def main(filename,backtest,start,end):
             #         json.dump(ClosedTrade, e)
             #     if not Decimal(str(k))%1 == 0.0:
             #         k = Decimal(ceil(k))
-            #         LzScore.append(dataframe6mois5m.loc[int(k),'zscore'])
-            #         LzScoreMA.append(dataframe6mois5m.loc[int(k),'zscoreMA'])
+            #         LzScore.append(dataframe6mois5m.loc[int(k),'20Zscore_price'])
+            #         LzScoreMA.append(dataframe6mois5m.loc[int(k),'20SMA_20Zscore_price'])
             #         LCapital.append(Capital)
     # else:    
 
@@ -284,8 +208,8 @@ async def main(filename,backtest,start,end):
     #     currentZscoreMA = CurrentzscoreMA(df,20)[0]
     #     currentPrice = df.iloc[-1].loc['colonne1']
     #     Entryprice = 0
-    #     #Strategie va etre : sell when zscore < currentMA
-    #     #Close trade when zscore = currentMA
+    #     #Strategie va etre : sell when 20Zscore_price < currentMA
+    #     #Close trade when 20Zscore_price = currentMA
     #     #Pour simuler le short en gain je vais juste faire prix de sortie-prix d'entrée
     #     while TRUE:
     #         print(zScore, currentZscoreMA)
@@ -339,7 +263,7 @@ async def main(filename,backtest,start,end):
 # fin = int(input("indice de fin, doit être supérieur à indice de début : "))
 # asyncio.run(main(a,b,debut,fin))
 
-asyncio.run(main('essai.json' ,'True',55000,60960))
+asyncio.run(main('essai.json' ,'True',100,67000))
 
 # print(STD)
 # print(displacement)

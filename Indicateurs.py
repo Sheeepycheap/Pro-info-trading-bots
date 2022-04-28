@@ -100,57 +100,54 @@ def PSAR(df, af=0.02, max=0.2):
     #On calcul le SAR à temps N avec la formule de récurence suivante: 
     #SARn = SAR(n-1) + AF(n-1)*(EP(n-1) - SAR(n-1)) sachant que SAR(0) = 1 er high (resp low) de la tendance haussière (resp baissière)
     #""
-    df['AF'] = np.nan
-    df['PSAR'] = np.nan
-    df['EP'] = np.nan
-    df['PSARdir'] = np.nan
-
     df.loc[0, 'AF'] = 0.02
     df.loc[0, 'PSAR'] = df.loc[0, 'low']
     df.loc[0, 'EP'] = df.loc[0, 'high']
     df.loc[0, 'PSARdir'] = "bull"
-
     for a in range(1, len(df)):
         if df.loc[a-1, 'PSARdir'] == 'bull':
-            df.loc[a, 'PSAR'] = df.loc[a-1, 'PSAR'] + (df.loc[a-1, 'AF']*(df.loc[a-1, 'EP']-df.loc[a-1, 'PSAR']))
-            df.loc[a, 'PSARdir'] = "bull"
-
-            if df.loc[a, 'low'] < df.loc[a-1, 'PSAR'] or df.loc[a, 'low'] < df.loc[a, 'PSAR']:
-                df.loc[a, 'PSARdir'] = "bear"
-                df.loc[a, 'PSAR'] = df.loc[a-1, 'EP']
-                df.loc[a, 'EP'] = df.loc[a-1, 'low']
-                df.loc[a, 'AF'] = af
+            df.loc[a, 'PSAR'] = df.loc[a-1, 'PSAR'] + df.loc[a-1,'AF']*(df.loc[a-1, 'EP']-df.loc[a-1, 'PSAR'])
+            if df.loc[a, 'high'] > df.loc[a-1, 'EP']:
+                df.loc[a,'EP'] = df.loc[a, 'high']
+                if df.loc[a-1, 'AF'] <0.2:
+                    df.loc[a, 'AF'] = df.loc[a-1, 'AF'] + af
+                else:
+                    df.loc[a, 'AF'] = df.loc[a-1, 'AF']
             else:
+                df.loc[a,'EP'] = df.loc[a-1, 'EP']
+                df.loc[a, 'AF'] = df.loc[a-1, 'AF']
+
+            if df.loc[a-1, 'PSAR'] > df.loc[a,'low'] : 
+                df.loc[a, 'PSARdir'] = 'bear'
+                df.loc[a,'EP'] = df.loc[a, 'low']
+                df.loc[a, 'AF'] = af
                 if df.loc[a, 'high'] > df.loc[a-1, 'EP']:
-                    df.loc[a, 'EP'] = df.loc[a, 'high']
-                    if df.loc[a-1, 'AF'] <= 0.18:
-                        df.loc[a, 'AF'] =df.loc[a-1, 'AF'] + af
-                    else:
-                        df.loc[a, 'AF'] = df.loc[a-1, 'AF']
-                elif df.loc[a, 'high'] <= df.loc[a-1, 'EP']:
-                    df.loc[a, 'AF'] = df.loc[a-1, 'AF']
-                    df.loc[a, 'EP'] = df.loc[a-1, 'EP']
-
-        elif df.loc[a-1, 'PSARdir'] == 'bear':
-            df.loc[a, 'PSAR'] = df.loc[a-1, 'PSAR'] - (df.loc[a-1, 'AF']*(df.loc[a-1, 'PSAR']-df.loc[a-1, 'EP']))
-            df.loc[a, 'PSARdir'] = "bear"
-
-            if df.loc[a, 'high'] > df.loc[a-1, 'PSAR'] or df.loc[a, 'high'] > df.loc[a, 'PSAR']:
-                df.loc[a, 'PSARdir'] = "bull"
-                df.loc[a, 'PSAR'] = df.loc[a-1, 'EP']
-                df.loc[a, 'EP'] = df.loc[a-1, 'high']
-                df.loc[a, 'AF'] = af
+                    df.loc[a, 'PSAR'] = df.loc[a, 'high']
+                else:
+                    df.loc[a, 'PSAR'] = df.loc[a-1,'EP']
             else:
-                if df.loc[a, 'low'] < df.loc[a-1, 'EP']:
-                    df.loc[a, 'EP'] = df.loc[a, 'low']
-                    if df.loc[a-1, 'AF'] < max:
-                        df.loc[a, 'AF'] = df.loc[a-1, 'AF'] + af
-                    else:
-                        df.loc[a, 'AF'] = df.loc[a-1, 'AF']
-
-                elif df.loc[a, 'low'] >= df.loc[a-1, 'EP']:
+                df.loc[a, 'PSARdir'] = 'bull'
+        if df.loc[a-1, 'PSARdir'] == 'bear':
+            df.loc[a, 'PSAR'] = df.loc[a-1, 'PSAR'] - df.loc[a-1,'AF']*(df.loc[a-1, 'PSAR'] - df.loc[a-1, 'EP'])
+            if df.loc[a, 'low'] < df.loc[a-1, 'EP']:
+                df.loc[a,'EP'] = df.loc[a, 'low']
+                if df.loc[a-1, 'AF'] <0.2:
+                    df.loc[a, 'AF'] = df.loc[a-1, 'AF'] + af
+                else:
                     df.loc[a, 'AF'] = df.loc[a-1, 'AF']
-                    df.loc[a, 'EP'] = df.loc[a-1, 'EP']
+            else:
+                df.loc[a,'EP'] = df.loc[a-1, 'EP']
+                df.loc[a, 'AF'] = df.loc[a-1, 'AF']
+            if df.loc[a-1, 'PSAR'] < df.loc[a,'high'] : 
+                df.loc[a, 'PSARdir'] = 'bull'
+                df.loc[a,'EP'] = df.loc[a, 'high']
+                df.loc[a, 'AF'] = af
+                if df.loc[a, 'low'] < df.loc[a-1, 'EP']:
+                    df.loc[a,'PSAR'] = df.loc[a, 'low']
+                else:
+                    df.loc[a, 'PSAR'] = df.loc[a-1,'EP']
+            else:
+                df.loc[a, 'PSARdir'] = 'bear'
 
 def MACD(data : pd.DataFrame, column : str):
 
@@ -158,8 +155,10 @@ def MACD(data : pd.DataFrame, column : str):
     ema(data,9,'MACD')
     data["MACD_HISTOGRAMME"] = data["MACD"] - data["9EMA_MACD"]
 
+def KijunLine(data : pd.DataFrame, colum : str ):
+    data['kijun'] = (1/2) * ( data['high'].rolling(window = 26).max() + data['low'].rolling(window= 26).min())
 
-
-
+def KijunLine(data : pd.DataFrame, colum : str ):
+    data['tenkan'] = (1/2) * ( data['high'].rolling(window = 9).max() + data['low'].rolling(window= 9).min())
 
 

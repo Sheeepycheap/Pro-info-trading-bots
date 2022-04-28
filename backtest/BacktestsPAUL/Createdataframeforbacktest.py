@@ -65,6 +65,7 @@ def dataframe(filename, timeframe : str, Starttime : int ,backtest : bool, pair 
     ind.PSAR(dataframe)
     ind.zscore(dataframe, 20, "price")
     ind.sma(dataframe,20, '20Zscore_price')
+    ind.sma(dataframe, 7, 'price')
     ind.MACD(dataframe, 'price')
     # dataframe = dataframe.drop(labels = 'index',axis = 1)
 
@@ -74,11 +75,17 @@ def dataframe(filename, timeframe : str, Starttime : int ,backtest : bool, pair 
 
 
 
-dataframe6mois5m = pd.read_pickle("./dataframe6mois5m.pkl")
 
-dataframe6mois4hBTC = dataframe('dataframe6mois4hBTC', '4h', 1629756000000, True, 'BTCUSDT')
-# dataframe6mois4hBTC = pd.read_pickle('./dataframe6mois4hBTC')
-dataframe6mois4hBTC.to_pickle('./dataframe6mois4hBTC')
+# dataframe6mois1mBTC = dataframe('dataframe6mois1mBTC', '1m', 1629756000000, True, 'BTCUSDT')
+# dataframe6mois1mBTC.to_pickle('./dataframe6mois1mBTC') #last tf at 337587 rn
+
+# dataframe6mois5mBTC = dataframe('dataframe6mois5mBTC', '5m', 1629756000000, True, 'BTCUSDT')
+# dataframe6mois5mBTC.to_pickle('./dataframe6mois5mBTC') 
+dataframe6mois5mBTC = pd.read_pickle("./dataframe6mois5mBTC") #last tf at 67514 rn
+
+# dataframe6mois4hBTC = dataframe('dataframe6mois4hBTC', '4h', 1629756000000, True, 'BTCUSDT')
+dataframe6mois4hBTC = pd.read_pickle('./dataframe6mois4hBTC')
+# dataframe6mois4hBTC.to_pickle('./dataframe6mois4hBTC')
 # dataframe6mois5m.plot(y = 'price', use_index = True)
 # dataframe6mois1m.plot(y = 'price', use_index = True)
 
@@ -101,7 +108,8 @@ dataframe6mois4hBTC.to_pickle('./dataframe6mois4hBTC')
 # print(dataframe6mois1m.iloc[-200:-150])
 # print(dataframe6mois5m.iloc[-4:])
 # print(datetime.utcfromtimestamp(1639460000 ).strftime('%Y-%m-%d %H:%M:%S'))
-print(dataframe6mois4hBTC.loc[:,'MACD'])
+
+print(dataframe6mois5mBTC.loc[:,'7SMA_price']) #iloc[-20:,3:9]
 
 # L = np.linspace(0,200,200)
 # Lzscore = []
