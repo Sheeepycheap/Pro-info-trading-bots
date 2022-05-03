@@ -13,3 +13,13 @@ le symbole yfinance en plus de celui de mt5
 2) 
 - Coder le menu acceuil
 - quitter l'application / se déconnecter 
+
+
+
+nouveau id : 41578200
+nouveau mdp : OnV6f1PemJh0
+serv : AdmiralMarkets-Demo
+
+nouveau2 id : 41600933
+nouveau2 mdp : ZL6HzUageSX6
+serv : AdmiralMarkets-Demo

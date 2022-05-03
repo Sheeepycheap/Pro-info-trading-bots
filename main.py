@@ -4,7 +4,7 @@ import MetaTrader5 as mt5
 from tkinter import *
 from functools import partial
 import Indicateurs as ind
-
+from tkinter import messagebox
 
 class Myapp : 
     def __init__(self):
@@ -39,6 +39,13 @@ class Myapp :
         self.root.config(menu = nav_bar)
      
     def connexion_frame(self) :
+<<<<<<< Updated upstream
+=======
+        #""
+        # Cette méthode construit le menu de connexion (qui apparaît dès le lancement)
+        #""
+        #Création des objets (bouton et les commandes, titre...)
+>>>>>>> Stashed changes
         label_title = Label(self.frame_welcome, text="Bienvenue sur l'application !", font =("Courrier",30),bg= "#4A4A4A",fg='white')
         label_subtitle = Label(self.frame_welcome, text="Veuillez indiquer vos identifiants de Connexion MetaTrader5 :", font=("Courrier", 15), bg = "#4A4A4A", fg = 'white')
         label_usr = Label(self.frame_welcome,text="Nom D'utilisateur :", font=("Courrier", 10), bg = "#252424", fg = 'white')
@@ -47,9 +54,16 @@ class Myapp :
         mdpEntry = Entry(self.frame_welcome,width= 50)
         label_server =  Label(self.frame_welcome,text="Serveur :", font=("Courrier", 10), bg = "#252424", fg = 'white')
         servEntry = Entry(self.frame_welcome,width= 50)
+<<<<<<< Updated upstream
         loginButton = Button(self.frame_welcome,text = "Connexion",command = partial(self.usr_login, usernameEntry, mdpEntry,servEntry))
 
 
+=======
+        loginButton = Button(self.frame_welcome,text = "Connexion",command = partial(self.usr_login, usernameEntry, mdpEntry,servEntry)) 
+        # partial est une fonction permettant le lancement d'une méthode (self.usr_login) uniquement lorsque le boutton est actionné. 
+        # Sans partial la méthode usr_login se lance dès l'instanciation, ce qui mène à une erreur. 
+        # Empaquetage des objets (bouton,titre...), ce qui permet l'affichage de ces objets. 
+>>>>>>> Stashed changes
         label_title.pack()
         label_subtitle.pack(pady=35)
         label_usr.pack(pady=3)
@@ -61,6 +75,12 @@ class Myapp :
         loginButton.pack(pady=3)
     
     def hide_frames(self) :
+<<<<<<< Updated upstream
+=======
+        #""
+        #Cette méthode permet de cacher les frames. Elle permet la navigation par la barre de navigation
+        #""
+>>>>>>> Stashed changes
         self.frame_welcome.pack_forget()
         self.bot_frame.pack_forget()
     
@@ -68,9 +88,16 @@ class Myapp :
         if not mt5.initialize() : 
             print("MetaTrader5 n'a pas pu être initialisée")
             quit()
-        else : 
-            if not mt5.login(int(usr.get()),mdp.get(),server.get()) : 
-                print("Vérifiez vos identifiants")
+        else :
+            a= int(usr.get())
+            print(a)
+            b = mdp.get()
+            print(b)
+            c = server.get()
+            print(c)
+            if not mt5.login(a,b,c) : 
+                #messagebox.showerror("Identifiants incorrects","Vérifiez vos identifiants.") 
+                print("erreur")
             else : 
                 print("Connexion réussie !")
                 self.hide_frames()
@@ -111,15 +138,14 @@ class Myapp :
         if strat.get() == "Trois Ema" : 
             print("ok")
             Bot = bot.TroisMA(mt5symbol=market.get(), volume = ind.money_to_volume(market.get(),float(volume.get())) , ysymbol="BTC-USD")
-            Bot.open_buy()
+            bot.Bot.open_buy(Bot)
             self.pill2kill.append(Bot)
     
     def kill_all(self) : 
         print(self.pill2kill)
         for thread in self.pill2kill :
-            if isinstance(thread,bot.TroisMA) :
-                print("ok")
-                bot.TroisMA.kill(thread)
+            bot.Bot.kill(thread) 
+           
 
 
 

@@ -82,3 +82,6 @@ res = pv(buy_sell(df)[2],buy_sell(df)[3])
 
 print (resultat(10000,res))
 plt.show()
+
+# Idée : faire croisement ema 4 9 18 : si croisement bullish : on ne considère que les mornings stars 
+# si bearish on ne considère que les inverse des morningstar
