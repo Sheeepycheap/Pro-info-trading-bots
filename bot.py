@@ -69,11 +69,8 @@ class TroisMA(Bot) :
         self.df = ind.ema(self.df,length=60,column='Close')
         self.pill2kill = []
         self.dead = True 
-<<<<<<< Updated upstream
-=======
         # self.dead sera utiliser plus tard pour terminer proccess_open_buy à terminer grâce à la méthode kill.
         self.position = 0
->>>>>>> Stashed changes
 
     def request(self,action,type,price,sl,tp,comment,position_ouverte : bool) -> None :
         #""
@@ -89,14 +86,10 @@ class TroisMA(Bot) :
 
     
     def update_df(self) : 
-<<<<<<< Updated upstream
-        self.df = ind.ydataframe(stock = self.ysymbol, start= '2022-03-14', interval='1m') 
-=======
         #""
         # Cette méthode permet de mettre à jour self.df, ce qui est nécessaire pour faire du trading en direct. 
         #""
         self.df = ind.ydataframe(stock = self.ysymbol, start= '2022-03-14', interval='5m') 
->>>>>>> Stashed changes
         self.df = ind.ema(self.df,length=20,column='Close')
         self.df = ind.ema(self.df,length=5,column='Close')
         self.df = ind.ema(self.df,length=60,column='Close')
@@ -124,12 +117,7 @@ class TroisMA(Bot) :
             elif self.df['5EMA_Close'][n] < self.df['20EMA_Close'][n] and self.df['20EMA_Close'][n] < self.df['60EMA_Close'][n] and  self.position_ouverte == True :
                 prix = mt5.symbol_info_tick(self.mt5symbol).bid
                 self.request(action = mt5.TRADE_ACTION_DEAL, type = mt5.ORDER_TYPE_SELL, price = prix, sl = 0.0,tp=0.0, comment = "sell",  position_ouverte = False )
-<<<<<<< Updated upstream
-                position = mt5.positions_get()[-1].ticket
-                ind.addkey(self.orders, position=position)  
-=======
                 ind.addkey(self.orders, position=self.position)  
->>>>>>> Stashed changes
                 mt5.order_send(self.orders)
             print(self.df['5EMA_Close'][n])
             print(self.df['20EMA_Close'][n])
@@ -138,22 +126,12 @@ class TroisMA(Bot) :
             time.sleep(10)
 
     def open_buy(self) :
-<<<<<<< Updated upstream
-        thread = threading.Thread(target= self.process_open_buy)
-        self.pill2kill.append(thread)
-        thread.start()
-
-    def kill(self) : 
-        self.dead = False 
-        self.pill2kill[0].join()
-=======
         pass
     
     def kill(self) :
         pass
 
 
->>>>>>> Stashed changes
 
 
 class Zscore(Bot) : 

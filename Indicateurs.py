@@ -2,7 +2,6 @@
 =======
 from this import d
 from pyparsing import col
->>>>>>> Stashed changes
 import yfinance as yf 
 import numpy as np
 import pandas as pd 
@@ -33,12 +32,8 @@ def sma(data,length : str, column : str) -> pd.DataFrame:
     #""
     #rajoute la colonne des sma d'une colonne. Le sma se calcul sur length unités. Renvoie une dataframe.
     #""    
-<<<<<<< Updated upstream
-    data[str(length) + "SMA_" + column] = data[column].rolling(window=length).mean() 
-=======
     data[str(length) + "SMA_" + column] = data[column].rolling(window=length).mean()
     return data
->>>>>>> Stashed changes
 
 def std(data, length : int, column : str) -> pd.DataFrame:
     #""
@@ -47,8 +42,6 @@ def std(data, length : int, column : str) -> pd.DataFrame:
     data[str(length) + "STD_" + column] = data[column].rolling(window=length).std()
     return data
 
-<<<<<<< Updated upstream
-=======
 def zscore(data, length : int, column : str) -> pd.DataFrame:
     #""
     #rajoute la colonne des zscore d'une colonne. Le zscore se calcul sur le length unité. Renvoie une datafram
@@ -81,7 +74,6 @@ def smoothaveragerange(data, column : str, fastperiod : float, fastrange : float
 
         return smr.ewm(span = wper, adjust = False).mean()*fastrange
 
->>>>>>> Stashed changes
 def removekey(orders) : 
     #""
     # Permet de supprimer la key "position" de orders. Pour ouvrir un ordre, il faut fournir un dictionnaire orders (qui ne contient pas 
