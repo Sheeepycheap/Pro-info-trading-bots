@@ -1,6 +1,3 @@
-<<<<<<< Updated upstream
-=======
-from this import d
 from pyparsing import col
 import yfinance as yf 
 import numpy as np
