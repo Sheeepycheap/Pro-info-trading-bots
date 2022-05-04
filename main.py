@@ -23,7 +23,6 @@ class Myapp :
         # Initialisation des threads à terminer :
         self.pill2kill = []
 
-
     def menu_bar(self) :
         #""
         # Cette méthode permet d'ajouter une barre de menu/navigation. Pour l'instant, le seul menu fonctionnel est 
