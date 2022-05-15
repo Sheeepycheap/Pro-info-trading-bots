@@ -1,5 +1,3 @@
-for i in range (4) : 
-    if i == 1 :
-        a = "a"
-    if i == 2 :
-        print(a)
+a = [1]
+b = [2]
+print(a+b)

@@ -18,14 +18,27 @@ def ydataframe(stock : str, start : str , interval : str ) -> pd.DataFrame :
     df.dropna(inplace=True)
     return df
 
-def ema(data, length : str, column : str ) -> pd.DataFrame :
+def slice_data(df,slice:int) -> pd.DataFrame :
+    #""
+    # Si on veut des dataframe de slice heures, on utilise cette fonction. Il n'y a pas de timeframe de 4h dans la 
+    # librairie yfinance, donc il faut la construire. 
+    #""
+    num= []
+    for k in range(1,len(df)+1) :
+        num.append(k)
+    df['index'] = num
+    df = df[df['index'] % slice == 0]
+    df = df.drop('index', 1)
+    return df
+
+def ema(data, length : int, column : str ) -> pd.DataFrame :
     #""
     #rajoute la colonne des ema d'une colonne. L'ema se calcul sur length unités. Renvoie une dataframe.
     #""
     data[str(length) + "EMA_" + column] = data[column].ewm(span = length , adjust = False).mean()
     return data
 
-def sma(data,length : str, column : str) -> pd.DataFrame:
+def sma(data,length : int, column : str) -> pd.DataFrame:
     #""
     #rajoute la colonne des sma d'une colonne. Le sma se calcul sur length unités. Renvoie une dataframe.
     #""    
@@ -105,6 +118,9 @@ def reco_morningstar(data)-> pd.DataFrame:
     data['Morningstar'] = talib.CDLMORNINGSTAR(data['Open'], data['High'], data['Low'], data['Close'])
     return data
 
+def reco_eveningstar(data)-> pd.DataFrame: 
+    data['Eveningstar'] = talib.CDLEVENINGSTAR(data['Open'],data['High'], data['Low'], data['Close'] )
+    return data
 
 def RSI(data,length) -> pd.DataFrame :
     #""
@@ -112,6 +128,22 @@ def RSI(data,length) -> pd.DataFrame :
     #""
     data['RSI'] = talib.RSI(data['Close'], timeperiod=length)
     return data
+
+def SAR(data)->pd.DataFrame : 
+    #""
+    # Ajoute une colonne SAR. 
+    #""
+    data['SAR'] = talib.SAR(data['High'], data['Low'], acceleration=0.02, maximum=0.2)
+    return data
+
+def MACD(df) -> pd.DataFrame : 
+    #""
+    # Ajoute une colonne MACD, Signal, et l'historigramme. 
+    #""
+    df['MACD'],df['Signal'],df['Hist'] = talib.MACD(df['Close'], fastperiod=12, slowperiod=26, signalperiod=9)
+    return df 
+
+
 
 
 
