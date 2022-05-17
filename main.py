@@ -4,7 +4,7 @@ import MetaTrader5 as mt5
 from tkinter import *
 from functools import partial
 import Indicateurs as ind
-
+from tkinter import messagebox
 
 class Myapp : 
     def __init__(self):
@@ -72,7 +72,7 @@ class Myapp :
     
     def hide_frames(self) :
         #""
-        # Cette méthode permet de cacher les frames. Elle permet la navigation par la barre de navigation
+        #Cette méthode permet de cacher les frames. Elle permet la navigation par la barre de navigation
         #""
         self.frame_welcome.pack_forget()
         self.bot_frame.pack_forget()
@@ -84,9 +84,16 @@ class Myapp :
         if not mt5.initialize() : 
             print("MetaTrader5 n'a pas pu être initialisée")
             quit()
-        else : 
-            if not mt5.login(int(usr.get()),mdp.get(),server.get()) : 
-                print("Vérifiez vos identifiants")
+        else :
+            a= int(usr.get())
+            print(a)
+            b = mdp.get()
+            print(b)
+            c = server.get()
+            print(c)
+            if not mt5.login(a,b,c) : 
+                #messagebox.showerror("Identifiants incorrects","Vérifiez vos identifiants.") 
+                print("erreur")
             else : 
                 print("Connexion réussie !")
                 self.hide_frames()
@@ -131,7 +138,7 @@ class Myapp :
         if strat.get() == "Trois Ema" : 
             print("ok")
             Bot = bot.TroisMA(mt5symbol=market.get(), volume = ind.money_to_volume(market.get(),float(volume.get())) , ysymbol="BTC-USD")
-            Bot.open_buy()
+            bot.Bot.open_buy(Bot)
             self.pill2kill.append(Bot)
     
     def kill_all(self) : 
@@ -140,9 +147,8 @@ class Myapp :
         # ""
         print(self.pill2kill)
         for thread in self.pill2kill :
-            if isinstance(thread,bot.TroisMA) :
-                print("ok")
-                bot.TroisMA.kill(thread)
+            bot.Bot.kill(thread) 
+           
 
 
 test = Myapp()
