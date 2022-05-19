@@ -18,18 +18,30 @@ from datetime import *
 from math import *
 from decimal import *
 import Indicateursbacktest as ind
-#get unix TIME
 #On va faire ça avec l'api binance
+#Clefs qui doivent etre passées en privées 
+
+#Pour récupérer des informations a propose de symboles on a besoin des clefs apis binance 
+#Ces dernieres sont à insérer ci dessous 
 api_key = '0W0NnouXJG5kHRuvjm7AcZNOSYxHHPmNWItts8ZUWcIp9aQv4QyCKUa1EbRTE4Iw'
 api_secret = 'NmW0ruph3E8qvg5c9c9ngEgukPVkHKCHYBPE27ZB8UBtD7kvI79JiWQDU7SXbwrF'
 client = Client(api_key, api_secret)
 
-# info = client.get_account_snapshot(type='SPOT')
-# for infos in info['snapshotVos'][0]['data']['balances']:
-#     print(infos)
+
 def dataframe(filename, timeframe : str, Starttime : int ,backtest : bool, pair : str):
-    #fonction qui renvoit la data depuis le temps spécifié
-    #pour prendre les datas et faire moins de calcul (ou pas) ca doit etre possible d'actualiser que les datas qui sont nouvelles
+    """
+    Fonction qui renvoit la data depuis le temps spécifié
+    Créer une dataframe à partir de différentes données spécifiées comme:
+
+    -La timeframe (1m, 5m, 15m, 30m, 1h, 2h, 4h, 1d)
+
+    -Le temps de début en unix à 10 digit (donc milli secondes)
+
+    -Backtest : True si les données doivent etre sauvegardés pour pouvoir travailler dessus ou False si c'est des données à utiliser en live trading
+    
+    -La paire avec "pair" : Toutes les paires disponibles sur binance sont récupérables. Par exemple : BTCUSDT
+    """
+    #Ici choix de la timeframe
     if timeframe == '5m':
         timeframe =  client.KLINE_INTERVAL_5MINUTE
     elif timeframe == '1m':
@@ -44,12 +56,15 @@ def dataframe(filename, timeframe : str, Starttime : int ,backtest : bool, pair 
         timeframe = client.KLINE_INTERVAL_4HOUR
     elif timeframe == '1d':
         timeframe = client.KLINE_INTERVAL_1DAY
+    
+    #création des bougies passées:
     klines = client.get_historical_klines(pair, timeframe, Starttime)
     Lopen = []
     Lhigh = []
     Llow = []
     Lclose = []
     Ldates = []
+    #création des liste pour la base de données
     for k in klines:
         Lopen.append(float(k[1])) #Open
         Lhigh.append(float(k[2])) #High
@@ -58,8 +73,7 @@ def dataframe(filename, timeframe : str, Starttime : int ,backtest : bool, pair 
         Ldates.append(int(k[0]/1000))
 
     d = {'date': Ldates, 'open' : Lopen, 'high' : Lhigh, 'low' : Llow, 'price' : Lclose}
-    # with open('recentdata.json','w+') as doc:
-    #     json.dump(d, doc)
+    
     df = pd.DataFrame(d)
     dataframe = df.reset_index(drop = True)
     ind.PSAR(dataframe)
@@ -67,7 +81,7 @@ def dataframe(filename, timeframe : str, Starttime : int ,backtest : bool, pair 
     ind.sma(dataframe,20, '20Zscore_price')
     ind.sma(dataframe, 7, 'price')
     ind.MACD(dataframe, 'price')
-    # dataframe = dataframe.drop(labels = 'index',axis = 1)
+    
 
     if backtest:
         dataframe.to_pickle(filename)  
@@ -75,9 +89,36 @@ def dataframe(filename, timeframe : str, Starttime : int ,backtest : bool, pair 
 
 
 
+backtest = input("Voulez vous download une dataframe? (True or False) ")
+if backtest == 'True':
+    timeframe = input("Choisissez une timeframe : (1m, 5m, 15m, 30m, 1h, 2h, 4h, 1d) ")
+    timestart = input("Choisissez un temps unix en milliseconde pour démarer la création de dataframe : ")
+    timestart = int(timestart)
+    try:
+        test1 = timestart/10**13
+        if int(test1) !=1:
+            timestart = 1629756000000 #valeure par défault
+            print('timestart value is not usuable default value 1629756000000 has been used')
+        test2 = timestart - ceil(timestart/10)*10
+        if int(test2) != 0:
+            timestart = 1629756000000 #valeure par défault
+            print('timestart value is not usuable default value 1629756000000 has been used')
+    except:
+        timestart = 1629756000000
+        print('timestart value is not usuable default value 1629756000000 has been used')
+    paire = input('Choisissez la paire pour la base de données: Ex: BTCUSDT ')
+    lengthofdataframe = (int(time.time()) - timestart/1000)/(3600*24*30)
+    name = "dataframe" + str(lengthofdataframe) + 'mois' + timeframe + paire
+    dataframe1 = dataframe(name, paire , timestart, True, paire)
 
-# dataframe6mois1mBTC = dataframe('dataframe6mois1mBTC', '1m', 1629756000000, True, 'BTCUSDT')
-# dataframe6mois1mBTC.to_pickle('./dataframe6mois1mBTC') #last tf at 337587 rn
+
+
+
+
+
+""""
+# TESTS NON UTILES
+"""
 
 # dataframe6mois5mBTC = dataframe('dataframe6mois5mBTC', '5m', 1629756000000, True, 'BTCUSDT')
 # dataframe6mois5mBTC.to_pickle('./dataframe6mois5mBTC') 
@@ -109,7 +150,7 @@ dataframe6mois4hBTC = pd.read_pickle('./dataframe6mois4hBTC')
 # print(dataframe6mois5m.iloc[-4:])
 # print(datetime.utcfromtimestamp(1639460000 ).strftime('%Y-%m-%d %H:%M:%S'))
 
-print(dataframe6mois5mBTC.loc[:,'7SMA_price']) #iloc[-20:,3:9]
+# print(dataframe6mois5mBTC.loc[:,'7SMA_price']) #iloc[-20:,3:9] 
 
 # L = np.linspace(0,200,200)
 # Lzscore = []

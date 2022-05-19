@@ -23,18 +23,17 @@ def Selecttime(dataframe,startime, endtime):
         
         Lx.append(dataframe.loc[k,'date'])
     return Lx
-#get unix TIME
-#On va faire ça avec l'api binance
-api_key = '0W0NnouXJG5kHRuvjm7AcZNOSYxHHPmNWItts8ZUWcIp9aQv4QyCKUa1EbRTE4Iw'
-api_secret = 'NmW0ruph3E8qvg5c9c9ngEgukPVkHKCHYBPE27ZB8UBtD7kvI79JiWQDU7SXbwrF'
-client = Client(api_key, api_secret)
+
+#importation des dataframe pour le backtest:
 dataframe6mois5m = pd.read_pickle("./dataframe6mois5mBTC")
 dataframe6mois1m = pd.read_pickle("./dataframe6mois1mBTC")
 
+#Initialisation de liste pour différentes représenations graphiques
 LCapital = []
 Lprice = []
 Lindex = []
 async def main(filename,backtest,start,end):
+    #Valeurs de TP/SL pour la stratégie (a adapter en fonction de la stratégie à bakctester)
     TP = 0.0165
     SL = 0.0012
     file = open(filename, 'w+')
@@ -46,25 +45,39 @@ async def main(filename,backtest,start,end):
     Bornes = 0
     #Variable de teste pour savoir si un trade est en cours ou pas
     enCours = False
+    #On initialise le capital de départ à 1000
     Capital = 1000
     longpossibility = False
     shortpossibility = False
     if backtest == 'True':
-#
-#Truc habituel en dessous:
-#
+
         Gainmoyentrade = 0 
-        Winrate = 0 
-        #Strategie va etre : sell when zscore < currentMA
-        #Close trade when zscore = currentMA
-        #Pour simuler le short en gain je vais juste faire prix de sortie-prix d'entrée
+        Winrate = 0
         k = Decimal(start)
+        #On instancie un objet backtest avec les données acutelles, elles seront modifiées à chaques entré dans un trade
         back1 = aut.backtest(dataframe6mois5m, dataframe6mois1m, filename,\
         TP, SL, k, end , enCours, Capital, nombreDeTrade, Winrate, Gainmoyentrade, Lindex ,Lprice, LCapital)
 
+        #On parcourt toute la dataframe
         while k < end:
+            """"
+            On parcourt toute la dataframe
+
+            A chaque étape on change les variables essentiels dans le backtesting (puisqu'elles sont différentes pour tout k). 
+            Ici on peut initialiser des conditions pour ouvrir des shorts et des longues, enfaite on va définir la stratégie à backtester
+            
+            Toutes les valeurs numériques sont changeable, elles sont choisis car c'est celles qui donnent les meilleurs rendement mais  
+            il peut en exister des meilleurs
+
+            /!\ Si du code est commenté c'est qu'il est souvent utile mais pas dans le dernier cas testé. 
+            """
+
             k+=Decimal(1)
+            
             back1.updateL(back1.Capital,dataframe6mois5m.loc[int(k),'date'],dataframe6mois5m.loc[int(k),'price'])
+
+            
+
             # if dataframe6mois5m.loc[int(k),'20Zscore_price'] >= 3:
             #     shortpossibility = True
             # elif dataframe6mois5m.loc[int(k),'20Zscore_price'] <= 1:
@@ -73,19 +86,28 @@ async def main(filename,backtest,start,end):
             #     longpossibility = True
             # elif dataframe6mois5m.loc[int(k),'20Zscore_price'] >= -1:
             #     longpossibility = False
+
+            #On définit les entrées dans un trade (entrée long =/= de entréé short)
             Entryconditionshort = dataframe6mois5m.loc[int(k),'20Zscore_price'] < dataframe6mois5m.loc[int(k) - 1,'20Zscore_price'] and dataframe6mois5m.loc[int(k) - 1 ,'20Zscore_price'] > 2.4
             Entryconditionlong = dataframe6mois5m.loc[int(k),'7SMA_price'] <= dataframe6mois5m.loc[int(k),'20SMA_price'] and longpossibility and dataframe6mois5m.loc[int(k),'20Zscore_price'] > dataframe6mois5m.loc[int(k) - 1,'20Zscore_price']
+
+            #Si les conditions précédentes sont réalisées alors on rentre dans un trade et on entre aussi dans la partie automatique du backetesting
+            #la base de donnée va etre parcouru à la recherche d'une condition de sortie
+            #L'inconvenient c'est que les conditions de sorties outre TP et SL doivent etre mentionner dans automatisaiont_backtest() avant le début du bakctest
+            #
             if Entryconditionshort and not Entryconditionlong:
                 typetrade = 'short'
                 back1.automatisation_backtest(TP , SL, typetrade, Entryconditionshort, Entryconditionlong, k, enCours, '5m', Lindex, Lprice, LCapital)
                 k = back1.indice
-                # shortpossibility = False
+
             # if Entryconditionlong and not Entryconditionshort:
             #     typetrade = 'long'
             #     back1.automatisation_backtest(TP , SL, typetrade, Entryconditionlong, Entryconditionlong, k, enCours, '5m', Lindex, Lprice, LCapital)
             #     k = back1.indice
             #     longpossibility = False
 
+
+#sauvegarde de variables utiles pour juger de la viabilité d'une stratégie
     Winrate = (back1.Winrate / back1.nombreDeTrade) * 100
     print("nombre de trade: " + str(back1.nombreDeTrade))
     print("gain moyen par trade: " + str(back1.Gainmoyentrade/back1.nombreDeTrade))
@@ -104,6 +126,13 @@ async def main(filename,backtest,start,end):
 
 asyncio.run(main('essai1.json' ,'True',100,67000))
 
+
+""""
+
+Ici on sauvegarde du code utile pour le backteste d'ancienne stratégie
+On a donc des exemples de code intéréssant et réutilisable
+
+"""
 #
 #cas du bot stratégie 1 
 #

@@ -14,11 +14,14 @@ import numpy as np
 from datetime import datetime
 from math import *
 from decimal import *
-# import Outconditionobject as out
-
-# from glassnode import GlassnodeClient
 import requests
 
+#Ce fichier et le fichier pour automatiser le backtest. Il est présent pour la lisibilité du code principal, pour faciliter les changements
+#de conditions en fonction des différentes stratégies à tester
+#
+#Pour ce faire, nous allons créer un objet backteste qui d'implementera à chaque trade
+#
+#
 class backtest:
     def __init__(self,dataframe5, dataframe1, filename : str, TP : float, SL : float, \
          indice : Decimal, end : int, enCours : bool, Capital : float, nombreDeTrade : int, Winrate, Gainmoyentrade : float, Lindex = [],\

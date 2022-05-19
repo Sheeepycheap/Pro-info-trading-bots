@@ -16,15 +16,6 @@ from math import *
 from decimal import *
 
 
-#get unix TIME
-#On va faire ça avec l'api binance
-api_key = '0W0NnouXJG5kHRuvjm7AcZNOSYxHHPmNWItts8ZUWcIp9aQv4QyCKUa1EbRTE4Iw'
-api_secret = 'NmW0ruph3E8qvg5c9c9ngEgukPVkHKCHYBPE27ZB8UBtD7kvI79JiWQDU7SXbwrF'
-client = Client(api_key, api_secret)
-
-
-
-
 
 # dataframe pour 6 mois en 5 miutes pour backtester
 
