@@ -8,6 +8,7 @@ import talib as tab
 import numpy as np
 
 df = ind.ydataframe(stock = "ETH-USD", start = '2021-05-10', interval='1h')
+print(df)
 #df = ind.slice_data(df,slice=4)
 #print(df)
 df['MACD'],df['Signal'],df['Hist'] = tab.MACD(df['Close'], fastperiod=12, slowperiod=26, signalperiod=9)

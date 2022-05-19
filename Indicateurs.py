@@ -59,7 +59,7 @@ def zscore(data, length : int, column : str) -> pd.DataFrame:
     sma(data,length, column)
     displacement = data[column] - data[str(length) + "SMA_" + column]
     std(data, length, column)
-    data[str(length) + "Zscore_" + column] = displacement.divide(data[str(length) + "STD_" + column])
+    data[str(length) + "Zscore_" + column] = displacement / data[str(length) + "STD_" + column] 
     return data
 
 def quantile(data, length : int, column : str, q : int) -> pd.DataFrame:
@@ -75,7 +75,6 @@ def variation(data, variationrange : int, column : str) -> pd.DataFrame:
     #""
     intermediarydataframe = data[column].iloc[variationrange:].reset_index(drop = True)
     return (data[column] - intermediarydataframe).abs()
-
 
 def smoothaveragerange(data, column : str, fastperiod : float, fastrange : float) -> pd.DataFrame:
         wper = fastperiod*2 - 1
@@ -111,8 +110,6 @@ def smoothaveragerange(data, column : str, fastperiod : float, fastrange : float
         smr = variation(data, 1, column).ewm(span =  fastperiod , adjust = False).mean()
 
         return smr.ewm(span = wper, adjust = False).mean()*fastrange
-
-  
 
 def removekey(orders) : 
     #""
