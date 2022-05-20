@@ -15,17 +15,9 @@ from datetime import datetime
 from math import *
 from decimal import *
 
-
-#get unix TIME
-#On va faire ça avec l'api binance
 api_key = '0W0NnouXJG5kHRuvjm7AcZNOSYxHHPmNWItts8ZUWcIp9aQv4QyCKUa1EbRTE4Iw'
 api_secret = 'NmW0ruph3E8qvg5c9c9ngEgukPVkHKCHYBPE27ZB8UBtD7kvI79JiWQDU7SXbwrF'
 client = Client(api_key, api_secret)
-
-
-
-# dataframe6mois5m = pd.read_pickle("./dataframe6mois5m.pkl")
-# dataframe6mois1m = pd.read_pickle("./dataframe6mois1m.pkl")
 
 dataframe6mois5m = pd.read_pickle("./dataframe6mois5mETH.pkl")
 dataframe6mois1m = pd.read_pickle("./dataframe6mois1mETH.pkl")
@@ -37,6 +29,25 @@ L = []
 LTP = []
 LSL = []
 Lcapital = []
+
+"""
+cette fonction optimise les tps et SL pour une stratégie donnée:
+Pour ce faire on va lancer un backtesting pour des valeurs de TPs et SLs différentes 
+Lorsque toutes les valeurs de TP et SL ont été tésté alors on renvoit le meilleur couple (TP,SL) donnant les meilleurs
+résultats
+
+Comment parcourt-t-on les différents TP/SL:
+    On cherche un ratio TP/SL >1. Pour cela on parcourt les valeurs de TP avec un pas de 0.0005 (0.005%) modifiable en fonction des stratégies
+    et des timeframes
+    Ensuite pour une valeure de TP fixée on utiliser toutes les valeurs de SL possible qui satisfasse le ratio
+    Dans le code suivant on veut que TP/SL > 10/7. 
+    On refait ces opérations jusqu'à avoir parcourru toutes les valeurs possibles de TP
+
+    /!\ Il faut prendre en compte la timeframe 
+    En effet si l'on utilise des stratégies intraday (timeframe = 1d) ou meme sur plusieurs jours les TP sont de l'ordre de plusieurs pourcents TP = o(10)
+    Donc le pas sera plus élévé que dans l'exemple précédent, de l'ordre de 0.2% = 0.002
+"""
+
 async def main(filename,backtest,start,end):
     TP = Decimal('0.01')
     SL = Decimal('0.001')
@@ -45,16 +56,11 @@ async def main(filename,backtest,start,end):
     file = open(filename, 'w+')
     entryTime = start
     typetrade = 'long'
-    #On veut avoir le nombre de trade
     nombreDeTrade = 0
-    #Variable pour savoir si le zscore est au dessus de 3 ou en dessous de -3
     Bornes = 0
-    #Variable de teste pour savoir si un trade est en cours ou pas
     enCours = False
     Capital = 1000
     if backtest == 'True':
-        #On veut monitor le trade en cours donc dans le while, on va regarder le prix toutes les minutes
-
         #On va essayer d'optimiser les Tps et SL pour la stratégie:
 
         while TP < 0.02:
@@ -71,9 +77,7 @@ async def main(filename,backtest,start,end):
                 k = Decimal(start)
                 while k < end:
                     k+=Decimal(1)
-                    # LzScore.append(dataframe6mois5m.loc[int(k),'zscore'])
-                    # LzScoreMA.append(dataframe6mois5m.loc[int(k),'zscoreMA'])
-                    # LCapital.append(Capital)
+
                     if dataframe6mois5m.loc[int(k)-1,'zscore'] >= 2.4 and dataframe6mois5m.loc[int(k),'zscore'] < dataframe6mois5m.loc[int(k) - 1, 'zscore']:
                         Bornes = 1
                     if  dataframe6mois5m.loc[int(k)-1,'zscore'] <= -2.4 and dataframe6mois5m.loc[int(k),'zscore'] > dataframe6mois5m.loc[int(k) - 1, 'zscore']:
@@ -89,8 +93,6 @@ async def main(filename,backtest,start,end):
                         entryTime = datetime.utcfromtimestamp(entryTimestamp).strftime('%Y-%m-%d %H:%M:%S')
                         #on initialise les datas pour la timeframe 1m
                         index = dataframe6mois1m.loc[dataframe6mois1m['date'] == entryTimestamp+240,'price'].index[0]
-                        # Lindex.append(dataframe6mois1m.loc[index,'date'])
-                        # Lprice.append(dataframe6mois5m.loc[int(k),'price'])
                         enCours = True
                         # while enCours:
                         while dataframe6mois5m.loc[int(k)-1,'zscore'] < 2.4 and k<end or enCours and k < end:
@@ -99,35 +101,19 @@ async def main(filename,backtest,start,end):
                             
                             index +=1
                             k = Decimal(str(k)) + Decimal('0.2')
-                            # Lindex.append(dataframe6mois1m.loc[index,'date'])
-                            # Lprice.append(dataframe6mois1m.loc[index,'price'])
-                            # print(dataframe6mois1m.loc[index, ['price','date']])
-                            # if Decimal(str(k))%1 == 0.0:
-                            #     LzScore.append(dataframe6mois5m.loc[int(k),'zscore'])
-                            #     LzScoreMA.append(dataframe6mois5m.loc[int(k),'zscoreMA'])
-                            #     LCapital.append(Capital)
+
                             if (dataframe6mois1m.loc[index,'price']-Entryprice)/Entryprice > TP:
                                 enCours = False
                                 break
                             if (Entryprice - dataframe6mois1m.loc[index,'price'])/Entryprice > SL:
                                 enCours = False
                                 break
-
-                        # outTime = datetime.utcfromtimestamp(dataframe6mois1m.loc[index,'date']).strftime('%Y-%m-%d %H:%M:%S')
-
-                        # #Donc faut arreter le backtesting si le capital tombe à 0
+                            
                         Outprice = dataframe6mois1m.loc[index,'price']
                         Resultattrade = Capital * (Outprice - Entryprice)/Entryprice
                         Capital = Capital + Resultattrade
-                        # nombreDeTrade+=1
-                        # ClosedTrade = {'Long ou short' : typetrade, 'Entry price' : Entryprice, 'Out price' : Outprice, 'Benefice on trade' : Resultattrade, 'Capital after this trade' : Capital, 'Date d\'entree' : entryTime, 'Date de sortie' : outTime}
-                        # with open(filename, 'a+') as e:
-                        #     json.dump(ClosedTrade, e)
                         if not Decimal(str(k))%1 == 0.0:
                             k = Decimal(ceil(k))
-                            # LzScore.append(dataframe6mois5m.loc[int(k),'zscore'])
-                            # LzScoreMA.append(dataframe6mois5m.loc[int(k),'zscoreMA'])
-                            # LCapital.append(Capital)
                 LTP.append(float(TP))
                 LSL.append(float(SL))
                 Lcapital.append(float(Capital))
@@ -145,13 +131,6 @@ async def main(filename,backtest,start,end):
         ax.scatter(xs = LTP, ys = LSL, zs = Lcapital)
         plt.show()
 
-
-
-# a = input("Entrez nom_du_fichier.json : ")
-# b = input("backtestet ? (True or False) : ")
-# debut = int(input("indice du début de 0 à 53200 : "))
-# fin = int(input("indice de fin, doit être supérieur à indice de début : "))
-# asyncio.run(main(a,b,debut,fin))
 
 asyncio.run(main('essai.json' ,'True',58000,59000))
 # 60960

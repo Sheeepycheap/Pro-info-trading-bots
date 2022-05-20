@@ -30,8 +30,12 @@ client = Client(api_key, api_secret)
 
 def dataframe(filename, timeframe : str, Starttime : int ,backtest : bool, pair : str):
     """
-    Fonction qui renvoit la data depuis le temps spécifié
-    Créer une dataframe à partir de différentes données spécifiées comme:
+    Fonction qui renvoit la data depuis le temps spécifié.
+    Créé une dataframe à partir de différentes données spécifiées
+
+    ---
+    Paramètres
+    ---
 
     -La timeframe (1m, 5m, 15m, 30m, 1h, 2h, 4h, 1d)
 
@@ -88,7 +92,11 @@ def dataframe(filename, timeframe : str, Starttime : int ,backtest : bool, pair 
     return dataframe
 
 
-
+"""
+Ci dessus est le code juste pour permettre à l'utilisateur de rentrer les données pour créer la dataframe qui est intéréssante à backtester
+Il suffit de répondre aux questions possées lors du lancement du code 
+Il y a une gestion des erreurs dans le cas ou les données proposées ne correspondent pas aux données attendus
+"""
 backtest = input("Voulez vous download une dataframe? (True or False) ")
 if backtest == 'True':
     timeframe = input("Choisissez une timeframe : (1m, 5m, 15m, 30m, 1h, 2h, 4h, 1d) ")
@@ -97,11 +105,11 @@ if backtest == 'True':
     try:
         test1 = timestart/10**13
         if int(test1) !=1:
-            timestart = 1629756000000 #valeure par défault
+            timestart = 1629756000000 #valeur par défault
             print('timestart value is not usuable default value 1629756000000 has been used')
         test2 = timestart - ceil(timestart/10)*10
         if int(test2) != 0:
-            timestart = 1629756000000 #valeure par défault
+            timestart = 1629756000000 #valeur par défault
             print('timestart value is not usuable default value 1629756000000 has been used')
     except:
         timestart = 1629756000000
@@ -122,10 +130,10 @@ if backtest == 'True':
 
 # dataframe6mois5mBTC = dataframe('dataframe6mois5mBTC', '5m', 1629756000000, True, 'BTCUSDT')
 # dataframe6mois5mBTC.to_pickle('./dataframe6mois5mBTC') 
-dataframe6mois5mBTC = pd.read_pickle("./dataframe6mois5mBTC") #last tf at 67514 rn
+# dataframe6mois5mBTC = pd.read_pickle("./dataframe6mois5mBTC") #last tf at 67514 rn
 
 # dataframe6mois4hBTC = dataframe('dataframe6mois4hBTC', '4h', 1629756000000, True, 'BTCUSDT')
-dataframe6mois4hBTC = pd.read_pickle('./dataframe6mois4hBTC')
+# dataframe6mois4hBTC = pd.read_pickle('./dataframe6mois4hBTC')
 # dataframe6mois4hBTC.to_pickle('./dataframe6mois4hBTC')
 # dataframe6mois5m.plot(y = 'price', use_index = True)
 # dataframe6mois1m.plot(y = 'price', use_index = True)

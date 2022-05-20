@@ -5,6 +5,9 @@ import pandas as pd
 import matplotlib.pyplot as plt 
 import MetaTrader5 as mt5 
 
+#Fichier de tous les indicateurs utilisés pour le backtest 
+
+
 def ydataframe(stock : str, start : str , interval : str ) -> pd.DataFrame :
     # ""
     # permet d'obtenir une dataframe issue de yfinance rapidement sans prise de tête. Le problème est que

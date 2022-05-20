@@ -14,27 +14,9 @@ import numpy as np
 from datetime import datetime
 from math import *
 from decimal import *
+import automatisationbacktest as aut
 
 
-
-# dataframe pour 6 mois en 5 miutes pour backtester
-
-
-
-# Dans les lignes suivantes on ouvre un fichier et on écrit du json dedans mais pas besoin
-# with open('btc_bars.json', 'w') as e:
-#     json.dump(klines, e)
-# Pour plot : 
-def plot(x,y1,y2):
-    plt.plot(x, y1, color='r', label='20Zscore_price')
-    plt.plot(x, y2, color='g', label='20SMA_20Zscore_price')
-    plt.show()
-
-# zscoreused =  []
-# zcoreemaused = []
-# Data btc pour backtester
-
-#select time data de 0 à 52985 avec 52985 = 24/02/2022 
 def Selecttime(dataframe,startime, endtime):
     Lx = []
     for k in range(startime,endtime+1):
@@ -42,208 +24,99 @@ def Selecttime(dataframe,startime, endtime):
         Lx.append(dataframe.loc[k,'date'])
     return Lx
 
-
+#importation des dataframe pour le backtest:
 dataframe6mois5m = pd.read_pickle("./dataframe6mois5mBTC")
 dataframe6mois1m = pd.read_pickle("./dataframe6mois1mBTC")
 
-LCapital = [1000]
+#Initialisation de liste pour différentes représenations graphiques
+LCapital = []
 Lprice = []
 Lindex = []
 async def main(filename,backtest,start,end):
-    TP = 0.003
-    SL = 0.001
+    #Valeurs de TP/SL pour la stratégie (a adapter en fonction de la stratégie à bakctester)
+    TP = 0.0165
+    SL = 0.0012
     file = open(filename, 'w+')
     entryTime = start
     typetrade = 'long'
     #On veut avoir le nombre de trade
     nombreDeTrade = 0
+    #Variable pour savoir si le zscore est au dessus de 3 ou en dessous de -3
+    Bornes = 0
     #Variable de teste pour savoir si un trade est en cours ou pas
     enCours = False
+    #On initialise le capital de départ à 1000
     Capital = 1000
+    longpossibility = False
+    shortpossibility = False
     if backtest == 'True':
-        #On veut monitor le trade en cours donc dans le while, on va regarder le prix toutes les minutes
 
-
-
-#
-#Truc habituel en dessous:
-#
-        Entryprice = 0
-        LzScore = [dataframe6mois5m.loc[start,'20Zscore_price']]
-        LzScoreMA = [dataframe6mois5m.loc[start,'20SMA_20Zscore_price']]
         Gainmoyentrade = 0 
-        Winrate = 0 
-        #Strategie va etre : sell when 20Zscore_price < currentMA
-        #Close trade when 20Zscore_price = currentMA
-        #Pour simuler le short en gain je vais juste faire prix de sortie-prix d'entrée
+        Winrate = 0
         k = Decimal(start)
-        Bornes = 0
+        #On instancie un objet backtest avec les données acutelles, elles seront modifiées à chaques entré dans un trade
+        back1 = aut.backtest(dataframe6mois5m, dataframe6mois1m, filename,\
+        TP, SL, k, end , enCours, Capital, nombreDeTrade, Winrate, Gainmoyentrade, Lindex ,Lprice, LCapital)
+
+        #On parcourt toute la dataframe
         while k < end:
+            """"
+            On parcourt toute la dataframe
+
+            A chaque étape on change les variables essentiels dans le backtesting (puisqu'elles sont différentes pour tout k). 
+            Ici on peut initialiser des conditions pour ouvrir des shorts et des longues, enfaite on va définir la stratégie à backtester
+            
+            Toutes les valeurs numériques sont changeable, elles sont choisis car c'est celles qui donnent les meilleurs rendement mais  
+            il peut en exister des meilleurs
+
+            /!\ Si du code est commenté c'est qu'il est souvent utile mais pas dans le dernier cas testé. 
+            """
+
             k+=Decimal(1)
-            LzScore.append(dataframe6mois5m.loc[int(k),'20Zscore_price'])
-            LzScoreMA.append(dataframe6mois5m.loc[int(k),'20SMA_20Zscore_price'])
-            LCapital.append(Capital)
-            if dataframe6mois5m.loc[int(k)-1,'20Zscore_price'] >= 2.4 and dataframe6mois5m.loc[int(k),'20Zscore_price'] < dataframe6mois5m.loc[int(k) - 1, '20Zscore_price']:
-                Bornes = 1
-            if  dataframe6mois5m.loc[int(k)-1,'20Zscore_price'] <= -2.4 and dataframe6mois5m.loc[int(k),'20Zscore_price'] > dataframe6mois5m.loc[int(k) - 1, '20Zscore_price']:
-                Bornes = -1
-                
-            #Short condition
-            if Bornes == 1 :
-                typetrade = 'short' 
-                # print('entrée dans trade')
-                Bornes = 0 
-                Entryprice = dataframe6mois5m.loc[int(k),'price']
-                entryTimestamp = dataframe6mois5m.loc[int(k),'date']
-                entryTime = datetime.utcfromtimestamp(entryTimestamp).strftime('%Y-%m-%d %H:%M:%S')
-                #on initialise les datas pour la timeframe 1m
-                index = dataframe6mois1m.loc[dataframe6mois1m['date'] == entryTimestamp+240,'price'].index[0]
-                Lindex.append(dataframe6mois1m.loc[index,'date'])
-                Lprice.append(dataframe6mois5m.loc[int(k),'price'])
-                enCours = True
-                # while enCours:
-                while dataframe6mois5m.loc[int(k)-1,'20Zscore_price'] > -2.4 and k<end or enCours and k< end: #currentZscore1m >= 0
-                    #ici on passe sur la dataframe une minute
-                    #Les données en commun sont la date et l'heure de la mesure donc on va récupérer ca
-                    
-                    index +=1
-                    k = Decimal(str(k)) + Decimal('0.2')
-                    Lindex.append(dataframe6mois1m.loc[index,'date'])
-                    Lprice.append(dataframe6mois1m.loc[index,'price'])
-                    if Decimal(str(k))%1 == 0.0:
-                        # LzScore.append(dataframe6mois5m.loc[int(k),'20Zscore_price'])
-                        # LzScoreMA.append(dataframe6mois5m.loc[int(k),'20SMA_20Zscore_price'])
-                        LCapital.append(Capital)
-                    if (Entryprice-dataframe6mois1m.loc[index,'price'])/Entryprice > 0.0165:
-                        enCours = False
-                        break
-                    if (dataframe6mois1m.loc[index,'price']-Entryprice)/Entryprice > 0.0012:
-                        enCours = False
-                        break
 
-                outTime = datetime.utcfromtimestamp(dataframe6mois1m.loc[index,'date']).strftime('%Y-%m-%d %H:%M:%S')
-                Outprice = dataframe6mois1m.loc[index,'price']
-                #Donc faut arreter le backtesting si le capital tombe à 0 
-                Resultattrade = Capital * (Entryprice - Outprice)/Entryprice
-                if Resultattrade >= 0:
-                    Winrate +=1
-                Capital = Capital + Resultattrade
-                nombreDeTrade+=1
-                Gainmoyentrade += Resultattrade
-                ClosedTrade = {'Long ou short' : typetrade, 'Entry price' : Entryprice, 'Out price' : Outprice, 'Benefice on trade' : Resultattrade, 'Capital after this trade' : Capital, 'Date d\'entree' : entryTime, 'Date de sortie' : outTime}
-                with open(filename, 'a+') as e:
-                    json.dump(ClosedTrade, e)
-                if not Decimal(str(k))%1 == 0.0:
-                    k = Decimal(ceil(k))
-                    # LzScore.append(dataframe6mois5m.loc[int(k),'20Zscore_price'])
-                    # LzScoreMA.append(dataframe6mois5m.loc[int(k),'20SMA_20Zscore_price'])
-                    LCapital.append(Capital)
+            #Ici on met à jour les informations importantes dans le backtest à chaque itération
+            back1.updateL(back1.Capital,dataframe6mois5m.loc[int(k),'date'],dataframe6mois5m.loc[int(k),'price'])
 
-# ""
-# Long condition
-# ""
-            # if Bornes == -1 :
+            
+            """ Code commenté utile """
+            # if dataframe6mois5m.loc[int(k),'20Zscore_price'] >= 3:
+            #     shortpossibility = True
+            # elif dataframe6mois5m.loc[int(k),'20Zscore_price'] <= 1:
+            #     shortpossibility = False
+            # if dataframe6mois5m.loc[int(k),'20Zscore_price'] <= -3 :
+            #     longpossibility = True
+            # elif dataframe6mois5m.loc[int(k),'20Zscore_price'] >= -1:
+            #     longpossibility = False
+            """ Fin Code commenté utile """
+
+            #On définit les entrées dans un trade (entrée long =/= de entréé short)
+            Entryconditionshort = dataframe6mois5m.loc[int(k),'20Zscore_price'] < dataframe6mois5m.loc[int(k) - 1,'20Zscore_price'] and dataframe6mois5m.loc[int(k) - 1 ,'20Zscore_price'] > 2.4
+            Entryconditionlong = dataframe6mois5m.loc[int(k),'7SMA_price'] <= dataframe6mois5m.loc[int(k),'20SMA_price'] and longpossibility and dataframe6mois5m.loc[int(k),'20Zscore_price'] > dataframe6mois5m.loc[int(k) - 1,'20Zscore_price']
+
+            #Si les conditions précédentes sont réalisées alors on rentre dans un trade et on entre aussi dans la partie automatique du backetesting
+            #la base de donnée va etre parcouru à la recherche d'une condition de sortie
+            #L'inconvenient c'est que les conditions de sorties outre TP et SL doivent etre mentionner dans automatisaiont_backtest() avant le début du bakctest
+            #
+            if Entryconditionshort and not Entryconditionlong:
+                typetrade = 'short'
+                back1.automatisation_backtest(TP , SL, typetrade, Entryconditionshort, Entryconditionlong, k, enCours, '5m', Lindex, Lprice, LCapital, True)
+                k = back1.indice
+            
+            """ Code commenté utile """
+            # if Entryconditionlong and not Entryconditionshort:
             #     typetrade = 'long'
-            #     # print('entrée dans trade')
-            #     Bornes = 0 
-            #     Entryprice = dataframe6mois5m.loc[int(k),'price']
-            #     entryTimestamp = dataframe6mois5m.loc[int(k),'date']
-            #     entryTime = datetime.utcfromtimestamp(entryTimestamp).strftime('%Y-%m-%d %H:%M:%S')
-            #     #on initialise les datas pour la timeframe 1m
-            #     index = dataframe6mois1m.loc[dataframe6mois1m['date'] == entryTimestamp+240,'price'].index[0]
-            #     Lindex.append(dataframe6mois1m.loc[index,'date'])
-            #     Lprice.append(dataframe6mois5m.loc[int(k),'price'])
-            #     enCours = True
-            #     # while enCours:
-            #     while dataframe6mois5m.loc[int(k)-1,'20Zscore_price'] < 2.4 and k<end or enCours: #currentZscore1m >= 0
-            #         #ici on passe sur la dataframe une minute
-            #         #Les données en commun sont la date et l'heure de la mesure donc on va récupérer ca
-                    
-            #         index +=1
-            #         k = Decimal(str(k)) + Decimal('0.2')
-            #         Lindex.append(dataframe6mois1m.loc[index,'date'])
-            #         Lprice.append(dataframe6mois1m.loc[index,'price'])
-            #         # print(dataframe6mois1m.loc[index, ['price','date']])
-            #         if Decimal(str(k))%1 == 0.0:
-            #             LzScore.append(dataframe6mois5m.loc[int(k),'20Zscore_price'])
-            #             LzScoreMA.append(dataframe6mois5m.loc[int(k),'20SMA_20Zscore_price'])
-            #             LCapital.append(Capital)
-            #         if (dataframe6mois1m.loc[index,'price']- Entryprice)/Entryprice > 0.005:
-            #             enCours = False
-            #             break
-            #         if (Entryprice - dataframe6mois1m.loc[index,'price'])/Entryprice > 0.003:
-            #             enCours = False
-            #             break
+            #     back1.automatisation_backtest(TP , SL, typetrade, Entryconditionlong, Entryconditionlong, k, enCours, '5m', Lindex, Lprice, LCapital)
+            #     k = back1.indice
+            #     longpossibility = False
+            """ Fin code commenté utile """
 
-            #     outTime = datetime.utcfromtimestamp(dataframe6mois1m.loc[index,'date']).strftime('%Y-%m-%d %H:%M:%S')
-            #     Outprice = dataframe6mois1m.loc[index,'price']
-            #     #Donc faut arreter le backtesting si le capital tombe à 0 
-            #     Resultattrade = Capital * (Outprice-Entryprice)/Entryprice
-            #     Capital = Capital + Resultattrade
-            #     nombreDeTrade+=1
-            #     ClosedTrade = {'Long ou short' : typetrade, 'Entry price' : Entryprice, 'Out price' : Outprice, 'Benefice on trade' : Resultattrade, 'Capital after this trade' : Capital, 'Date d\'entree' : entryTime, 'Date de sortie' : outTime}
-            #     with open(filename, 'a+') as e:
-            #         json.dump(ClosedTrade, e)
-            #     if not Decimal(str(k))%1 == 0.0:
-            #         k = Decimal(ceil(k))
-            #         LzScore.append(dataframe6mois5m.loc[int(k),'20Zscore_price'])
-            #         LzScoreMA.append(dataframe6mois5m.loc[int(k),'20SMA_20Zscore_price'])
-            #         LCapital.append(Capital)
-    # else:    
-
-    #     #a update dans la boucle
-    #     now = int( time.time() )*1000
-    #     From = now - 14400000
-    #     df = dataframe('5m', From)
-    #     zScore = Zscore(df,20)[0]
-    #     currentZscoreMA = CurrentzscoreMA(df,20)[0]
-    #     currentPrice = df.iloc[-1].loc['colonne1']
-    #     Entryprice = 0
-    #     #Strategie va etre : sell when 20Zscore_price < currentMA
-    #     #Close trade when 20Zscore_price = currentMA
-    #     #Pour simuler le short en gain je vais juste faire prix de sortie-prix d'entrée
-    #     while TRUE:
-    #         print(zScore, currentZscoreMA)
-    #         if zScore < currentZscoreMA:
-    #             Entryprice = currentPrice
-    #             while zScore < currentZscoreMA:
-    #                 await asyncio.sleep(300)
-    #                 #On update dans la boucle toutes les 5 min pour avoir les dernieres données 
-    #                 now = int( time.time() )*1000
-    #                 From = now - 14400000
-    #                 df = dataframe('5m', From)
-    #                 zScore = Zscore(df,20)[0]
-    #                 currentZscoreMA = CurrentzscoreMA(df,20)[0]
-    #                 currentPrice = df.iloc[-1].loc['colonne1']
-    #                 print(zScore, currentZscoreMA)
-    #             Outprice = currentPrice
-    #             Resultattrade = Capital * (Entryprice - Outprice)/Entryprice
-    #             Capital = Capital + Resultattrade
-    #             ClosedTrade = {'Entry price' : Entryprice, 'Out price' : Outprice, 'Benefice on trade' : Resultattrade, 'Capital after this trade' : Capital }
-    #             print("trade done !")
-    #             with open(filename, 'a+') as e:
-    #                 json.dump(ClosedTrade, e)
-    #         else:
-                
-    #             await asyncio.sleep(300)
-    #             now = int( time.time() )*1000
-    #             From = now - 14400000
-    #             df = dataframe('5m', From)
-    #             zScore = Zscore(df,20)[0]
-    #             currentZscoreMA = CurrentzscoreMA(df,20)[0]
-    #             currentPrice = df.iloc[-1].loc['colonne1']
-
-
-    # plt.plot(Selecttime(start, end), LzScore)
-    # plt.plot(Selecttime(start, end), LzScoreMA)
-    # print(dataframe6mois1m.loc[55340:55400,'price'])
-
-    Winrate = (Winrate/nombreDeTrade) * 100
-    print("nombre de trade: " + str(nombreDeTrade))
-    print("gain moyen par trade: " + str(Gainmoyentrade/nombreDeTrade))
+#sauvegarde de variables utiles pour juger de la viabilité d'une stratégie
+    Winrate = (back1.Winrate / back1.nombreDeTrade) * 100
+    print("nombre de trade: " + str(back1.nombreDeTrade))
+    print("gain moyen par trade: " + str(back1.Gainmoyentrade/back1.nombreDeTrade))
     print("Winrate: " + str(Winrate) + "%")
     fig, (ax1, ax2) = plt.subplots(2)
-    ax1.plot(Selecttime(dataframe6mois5m,start, end), LCapital)
+    ax1.plot(Lindex, back1.LCapital)
     ax2.plot(Lindex,Lprice)
     plt.show()
 
@@ -254,9 +127,35 @@ async def main(filename,backtest,start,end):
 # fin = int(input("indice de fin, doit être supérieur à indice de début : "))
 # asyncio.run(main(a,b,debut,fin))
 
-asyncio.run(main('essai.json' ,'True',100,67000))
+asyncio.run(main('./essai1.json' ,'True',100,67000))
 
-# print(STD)
-# print(displacement)
-# def zScore(asset,timeframe):
-#    curentMA
+
+""""
+
+Ici on sauvegarde du code utile pour le backteste d'ancienne stratégie
+On a donc des exemples de code intéréssant et réutilisable
+
+"""
+#
+#cas du bot stratégie 1 
+#
+# if dataframe6mois5m.loc[int(k),'20Zscore_price'] >= 3:
+#    shortpossibility = True
+#if dataframe6mois5m.loc[int(k),'20Zscore_price'] <= -3:
+#    longpossibility = True
+#Entryconditionshort = shortpossibility and dataframe6mois5m.loc[int(k),'20Zscore_price'] < dataframe6mois5m.loc[int(k) - 1, '20Zscore_price'] and dataframe6mois5m.loc[int(k),'20Zscore_price'] < dataframe6mois5m.loc[int(k), '20SMA_20Zscore_price']
+#Entryconditionlong = longpossibility and dataframe6mois5m.loc[int(k),'20Zscore_price'] > dataframe6mois5m.loc[int(k) - 1, '20Zscore_price'] and dataframe6mois5m.loc[int(k),'20Zscore_price'] > dataframe6mois5m.loc[int(k), '20SMA_20Zscore_price']
+
+#
+#Cas du bot stratégie 2 
+#
+# if dataframe6mois5m.loc[int(k),'20Zscore_price'] >= 3:
+#     shortpossibility = True
+# elif dataframe6mois5m.loc[int(k),'20Zscore_price'] <= 1:
+#     shortpossibility = False
+# if dataframe6mois5m.loc[int(k),'20Zscore_price'] <= -3 :
+#     longpossibility = True
+# elif dataframe6mois5m.loc[int(k),'20Zscore_price'] >= -1:
+#     longpossibility = False
+# Entryconditionshort = dataframe6mois5m.loc[int(k),'7SMA_price'] >= dataframe6mois5m.loc[int(k),'20SMA_price'] and shortpossibility and dataframe6mois5m.loc[int(k),'20Zscore_price'] < dataframe6mois5m.loc[int(k) - 1,'20Zscore_price']
+# Entryconditionlong = dataframe6mois5m.loc[int(k),'7SMA_price'] <= dataframe6mois5m.loc[int(k),'20SMA_price'] and longpossibility and dataframe6mois5m.loc[int(k),'20Zscore_price'] > dataframe6mois5m.loc[int(k) - 1,'20Zscore_price']
