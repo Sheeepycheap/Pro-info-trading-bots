@@ -33,15 +33,14 @@ Lcapital = []
 """
 cette fonction optimise les tps et SL pour une stratégie donnée:
 Pour ce faire on va lancer un backtesting pour des valeurs de TPs et SLs différentes 
-Lorsque toutes les valeurs de TP et SL ont été tésté alors on renvoit le meilleur couple (TP,SL) donnant les meilleurs
-résultats
+Lorsque toutes les valeurs de TP et SL ont été testé alors on renvoie le couple (TP,SL) donnant les meilleurs résultats
 
 Comment parcourt-t-on les différents TP/SL:
     On cherche un ratio TP/SL >1. Pour cela on parcourt les valeurs de TP avec un pas de 0.0005 (0.005%) modifiable en fonction des stratégies
     et des timeframes
     Ensuite pour une valeure de TP fixée on utiliser toutes les valeurs de SL possible qui satisfasse le ratio
     Dans le code suivant on veut que TP/SL > 10/7. 
-    On refait ces opérations jusqu'à avoir parcourru toutes les valeurs possibles de TP
+    On refait ces opérations jusqu'à avoir parcouru toutes les valeurs possibles de TP
 
     /!\ Il faut prendre en compte la timeframe 
     En effet si l'on utilise des stratégies intraday (timeframe = 1d) ou meme sur plusieurs jours les TP sont de l'ordre de plusieurs pourcents TP = o(10)

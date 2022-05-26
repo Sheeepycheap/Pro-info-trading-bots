@@ -4,10 +4,7 @@ import pandas as pd
 import yfinance as yf
 import requests as rq
 from binance import *
-import asyncio
 import json
-import requests
-import time
 from matplotlib import *
 import matplotlib.pyplot as plt
 import numpy as np
@@ -85,14 +82,12 @@ class backtest:
         # self.Lprice = Lprice
         Entryprice = 1
         Outprice = 1
-        if self.indice == 60000:
-            print(self.indice)
         if typetrade == 'long':
             Entryprice = self.dataframe5.loc[int(self.indice),'price']
             entryTimestamp = self.dataframe5.loc[int(self.indice),'date']
             entryTime = datetime.utcfromtimestamp(entryTimestamp).strftime('%Y-%m-%d %H:%M:%S')
             #on initialise les datas pour la timeframe 1m
-
+            
             index = self.dataframe1.loc[self.dataframe1['date'] == entryTimestamp+self.getcurrentindex(timeframe),'price'].index[0]
             # self.Lindex.append(self.dataframe1.loc[index,'date'])
             # self.Lprice.append(self.dataframe5.loc[int(self.indice),'price'])

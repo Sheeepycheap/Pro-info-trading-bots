@@ -7,9 +7,6 @@ import pandas as pd
 import yfinance as yf
 import requests as rq
 from binance import *
-import asyncio
-import json
-import requests
 import time
 from matplotlib import *
 import matplotlib.pyplot as plt
@@ -18,6 +15,7 @@ from datetime import *
 from math import *
 from decimal import *
 import Indicateursbacktest as ind
+
 #On va faire ça avec l'api binance
 #Clefs qui doivent etre passées en privées 
 
@@ -43,7 +41,7 @@ def dataframe(filename, timeframe : str, Starttime : int ,backtest : bool, pair 
 
     -Backtest : True si les données doivent etre sauvegardés pour pouvoir travailler dessus ou False si c'est des données à utiliser en live trading
     
-    -La paire avec "pair" : Toutes les paires disponibles sur binance sont récupérables. Par exemple : BTCUSDT
+    -La paire avec "pair" : Toutes les paires disponibles sur binance sont récupérables. Par exemple : BTCUSDT renvoie les différents prix du bitcoin en fonction du prix du dollar.
     """
     #Ici choix de la timeframe
     if timeframe == '5m':
@@ -101,8 +99,8 @@ backtest = input("Voulez vous download une dataframe? (True or False) ")
 if backtest == 'True':
     timeframe = input("Choisissez une timeframe : (1m, 5m, 15m, 30m, 1h, 2h, 4h, 1d) ")
     timestart = input("Choisissez un temps unix en milliseconde pour démarer la création de dataframe : ")
-    timestart = int(timestart)
     try:
+        timestart = int(timestart)
         test1 = timestart/10**13
         if int(test1) !=1:
             timestart = 1629756000000 #valeur par défault
