@@ -32,6 +32,9 @@ class Bot(ABC) :
         self.dead = False 
         self.pill2kill[0].join()
 
+            
+        
+
 class TroisMA(Bot) :
     # ""
     # Il s'agit d'implémenter la stratégie des 3MA. Bien que peu efficace, elle reste rentable. 
@@ -61,7 +64,7 @@ class TroisMA(Bot) :
         # determine la position dans laquelle où nous sommes : a-t-on une 
         # position ouverte ? False signifie que nous n'avons pas de position ouverte : on peut procéder
         # à une opération. 
-        self.df = ind.ydataframe(stock = ysymbol, start= '2022-05-14', interval='5m')
+        self.df = ind.ydataframe(stock = ysymbol, start= '2022-05-27', interval='5m')
         self.df = ind.ema(self.df,length=20,column='Close')
         self.df = ind.ema(self.df,length=5,column='Close')
         self.df = ind.ema(self.df,length=60,column='Close')
@@ -69,6 +72,7 @@ class TroisMA(Bot) :
         self.dead = True 
         # self.dead sera utiliser plus tard pour terminer proccess_open_buy à terminer grâce à la méthode kill.
         self.position = 0
+        print("Bot Trois Ema initialisée !")
 
     def request(self,action,type,price,sl,tp,comment,position_ouverte : bool) -> None :
         #""
@@ -87,7 +91,7 @@ class TroisMA(Bot) :
         #""
         # Cette méthode permet de mettre à jour self.df, ce qui est nécessaire pour faire du trading en direct. 
         #""
-        self.df = ind.ydataframe(stock = self.ysymbol, start= '2022-03-14', interval='5m') 
+        self.df = ind.ydataframe(stock = self.ysymbol, start= '2022-05-27', interval='5m') 
         self.df = ind.ema(self.df,length=20,column='Close')
         self.df = ind.ema(self.df,length=5,column='Close')
         self.df = ind.ema(self.df,length=60,column='Close')
@@ -176,6 +180,7 @@ class Zscore(Bot) :
             self.position = 0
             self.tp = 0.0
             self.sl = 0.0
+            print("Bot Zscore initialisée ! ")
 
         def request(self,action,type,price,sl,tp,comment,position_ouverte : bool) -> None :
             #""
@@ -203,10 +208,9 @@ class Zscore(Bot) :
             # est calculé grâce à une moyenne mobile de 20 jours ), donc on peut ésperer une chute des prix.
             #""
             while self.dead :
-                print(mt5.symbol_info_tick(self.mt5symbol).ask)
                 ask = mt5.symbol_info_tick(self.mt5symbol).ask
                 n=len(self.df) - 1  
-                print(self.df['20Zscore_Close'][n])   
+                print("le Zscore est de " + str(self.df['20Zscore_Close'][n]))   
                 if  self.df['20Zscore_Close'][n] > 2.4 and self.position_ouverte == False :
                     print("Signal d'ouverture de position")
                     prix = mt5.symbol_info_tick(self.mt5symbol).bid
@@ -486,6 +490,7 @@ class PSAR_MACD(Bot) :
             self.position = 0
             self.tp = 0.0
             self.sl = 0.0
+            print("Bot PSAR_MACD initialisée !")
 
         def request(self,action,type,price,sl,tp,comment) -> None :
             self.orders['action'] = action
@@ -507,7 +512,6 @@ class PSAR_MACD(Bot) :
             while self.dead :
                 ask = mt5.symbol_info_tick(self.mt5symbol).ask
                 bid = mt5.symbol_info_tick(self.mt5symbol).bid
-                print(self.df)
                 n=len(self.df) - 1   
                 #  Pour des soucis de compréhension, on va dire qu'on divise la boucle en deux partie : une partie où l'on 
                 # fait les longs et une autre on s'intéresse au short. En réalité il n'y a pas de division, c'est juste 
@@ -589,22 +593,21 @@ class PSAR_MACD(Bot) :
 
 
 
-def usr_login(usr : int, mdp : str, server : str) :
-    if not mt5.initialize() : 
-         print("MetaTrader5 n'a pas pu être initialisée")
-         quit()
-    else : 
-        if not mt5.login(usr,mdp,server) : 
-            print("Vérifiez vos identifiants")
-        else : 
-            print("Connexion réussie !")
+# def usr_login(usr : int, mdp : str, server : str) :
+#     if not mt5.initialize() : 
+#          print("MetaTrader5 n'a pas pu être initialisée")
+#          quit()
+#     else : 
+#         if not mt5.login(usr,mdp,server) : 
+#             print("Vérifiez vos identifiants")
+#         else : 
+#             print("Connexion réussie !")
 
-usr_login(usr = 41600933, mdp = "ZL6HzUageSX6", server = "AdmiralMarkets-Demo" )
+# usr_login(usr = 41600933, mdp = "ZL6HzUageSX6", server = "AdmiralMarkets-Demo" )
 
-
-botzscore = PSAR_MACD(mt5symbol="EURUSD",volume=0.01,ysymbol="EURUSD=X")
-print(botzscore.df)
-botzscore.process_open_buy()
+# botzscore = PSAR_MACD(mt5symbol="EURUSD",volume=0.01,ysymbol="EURUSD=X")
+# print(botzscore.df)
+# botzscore.process_open_buy()
 
 
 

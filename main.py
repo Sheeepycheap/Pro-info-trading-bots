@@ -2,9 +2,11 @@ from Indicateurs import money_to_volume
 import bot
 import MetaTrader5 as mt5
 from tkinter import *
+from tkinter import ttk 
 from functools import partial
 import Indicateurs as ind
 from tkinter import messagebox
+
 
 class Myapp : 
     def __init__(self):
@@ -20,6 +22,7 @@ class Myapp :
         self.frame_welcome.pack(expand = YES) 
         # initialisation des frames de l'onglet "bots"
         self.bot_frame = Frame(self.root,bg="#4A4A4A")
+        self.accceuil_frame = Frame(self.root,bg="#4A4A4A")
         # Initialisation des threads à terminer :
         self.pill2kill = []
 
@@ -29,17 +32,45 @@ class Myapp :
         # le menu bot
         #""
         nav_bar = Menu(self.root)
-        nav_bar.add_command(label = "Acceuil")
+        nav_bar.add_command(label = "Acceuil", command = self.to_acceuil)
         file_menu = Menu(nav_bar,tearoff = 0)
         file_menu.add_command(label="Stratégie A")
         file_menu.add_command(label = "Stratégie B")
         file_menu.add_command(label = "Bref t'as compris ...")
         nav_bar.add_cascade(label = "Stratégies", menu = file_menu)
-        nav_bar.add_command(label = "Bots")        
+        nav_bar.add_command(label = "Bots", command = self.to_bots)        
         nav_bar.add_command(label = "Help")    
         nav_bar.add_command(label = "Déconnexion")  
         self.root.config(menu = nav_bar)
-     
+
+    def hide_frames(self) :
+        #""
+        #Cette méthode permet de cacher les frames. Elle permet la navigation par la barre de navigation
+        #""
+        self.frame_welcome.pack_forget()
+        self.bot_frame.pack_forget()
+        self.bot_frame.destroy()
+        self.accceuil_frame.pack_forget()
+        self.accceuil_frame.destroy()
+
+    def to_acceuil(self) :
+        self.hide_frames()
+        self.acceuil_frame()
+
+    def to_bots(self) : 
+        self.hide_frames()
+        self.bots_frame() 
+
+    def acceuil_frame(self) :
+        self.accceuil_frame = Frame(self.root,bg="#4A4A4A")
+        label_title = Label(self.accceuil_frame, text="Bienvenue sur l'acceuil !", font =("Courrier",30),bg= "#4A4A4A",fg='white')
+        label_subtitle = Label(self.accceuil_frame, text="Veuillez indiquer vos identifiants de Connexion MetaTrader5 :", font=("Courrier", 15), bg = "#4A4A4A", fg = 'white')
+        label_usr = Label(self.accceuil_frame,text="Nom D'utilisateur :", font=("Courrier", 10), bg = "#252424", fg = 'white')
+        label_title.pack()
+        label_subtitle.pack(pady=35)
+        label_usr.pack(pady=3)
+        self.accceuil_frame.pack(expand = YES)
+
     def connexion_frame(self) :
         #""
         # Cette méthode construit le menu de connexion (qui apparaît dès le lancement)
@@ -69,12 +100,6 @@ class Myapp :
         servEntry.pack(pady=3)
         loginButton.pack(pady=3)
     
-    def hide_frames(self) :
-        #""
-        #Cette méthode permet de cacher les frames. Elle permet la navigation par la barre de navigation
-        #""
-        self.frame_welcome.pack_forget()
-        self.bot_frame.pack_forget()
     
     def usr_login(self,usr , mdp, server ) :
         #""
@@ -85,11 +110,8 @@ class Myapp :
             quit()
         else :
             a= int(usr.get())
-            print(a)
             b = mdp.get()
-            print(b)
             c = server.get()
-            print(c)
             if not mt5.login(a,b,c) : 
                 #messagebox.showerror("Identifiants incorrects","Vérifiez vos identifiants.") 
                 print("erreur")
@@ -100,14 +122,18 @@ class Myapp :
 
     def bots_frame(self) :        
         # Création du texte et des boutons
+        self.bot_frame = Frame(self.root,bg="#4A4A4A")
         label_title1 = Label(self.bot_frame,text="Veuillez choisir une ou plusieurs stratégies. \n Pour obtenir plus d'informations sur les stratégies mis en place, allez dans l'onglet Stratégies ", font =("Courrier",15),bg= "#4A4A4A",fg='white' )
         label_strat = Label(self.bot_frame,text="Stratégie :", font=("Courrier", 10), bg = "#252424", fg = 'white')
-        stratEntry = Entry(self.bot_frame,width= 25)
+        liste_strat= ["Choisir une stratégie", "Trois Ema", "Zscore", "Morningstar","Eveningstar","SAR + MACD + 200 Ema"]
+        stratEntry = ttk.Combobox(self.bot_frame, value=liste_strat)
         label_vol = Label(self.bot_frame,text="Montant :", font=("Courrier", 10), bg = "#252424", fg = 'white')
         volEntry = Entry(self.bot_frame,width= 25)
-        label_actif = Label(self.bot_frame,text="L'actif :", font=("Courrier", 10), bg = "#252424", fg = 'white')
+        label_actif = Label(self.bot_frame,text="Actif (clé Metatrader) :", font=("Courrier", 10), bg = "#252424", fg = 'white')
         actifEntry = Entry(self.bot_frame,width= 25) 
-        runButton = Button(self.bot_frame,text = "RUN",bg="#54B22E",fg ='white', command = partial(self.run_strat,stratEntry,volEntry,actifEntry)) 
+        label_yfinance = Label(self.bot_frame,text="Actif (clé yfinance) :", font=("Courrier", 10), bg = "#252424", fg = 'white')
+        actifEntry_yfinance = Entry(self.bot_frame,width= 25) 
+        runButton = Button(self.bot_frame,text = "RUN",bg="#54B22E",fg ='white', command = partial(self.run_strat,stratEntry,volEntry,actifEntry,actifEntry_yfinance)) 
         label_title2 = Label(self.bot_frame,text="Veuillez choisir un bot actif que vous voulez arrêter (STOP ALL termine tous les bots) :", font =("Courrier",15),bg= "#4A4A4A",fg='white' )
         label_tokill = Label(self.bot_frame, text="Indiquez la stratégie que vous voulez arrêtez",font=("Courrier", 10), bg = "#252424", fg = 'white')
         tokillEntry = Entry(self.bot_frame,width= 25)
@@ -116,11 +142,13 @@ class Myapp :
         # Affichage de la frame (empaquettage)
         label_title1.pack(side = TOP)
         label_strat.pack(pady=3)
-        stratEntry.pack(pady=3)
+        stratEntry.pack(pady=5)
         label_vol.pack(pady=3)
         volEntry.pack(pady=3) 
         label_actif.pack(pady=3)
         actifEntry.pack(pady=3)
+        label_yfinance.pack(pady=3)
+        actifEntry_yfinance.pack(pady=3)
         runButton.pack()
         label_title2.pack()
         label_tokill.pack()
@@ -129,14 +157,34 @@ class Myapp :
         kill_allButton.pack()
         self.bot_frame.pack(expand = YES)
 
-    def run_strat(self, strat:str , volume : float, market : str) :
+    def run_strat(self, strat:str , volume : float, mt5_key : str,yfinance_key :str) :
         #""
         # Cette méthode permet de lancer les stratégies en instanciant des objets des classes du fichier bot.py. 
         # Pour l'instant il n'y a qu'une seule stratégie. 
         #""
         if strat.get() == "Trois Ema" : 
-            print("ok")
-            Bot = bot.TroisMA(mt5symbol=market.get(), volume = ind.money_to_volume(market.get(),float(volume.get())) , ysymbol="BTC-USD")
+            print("Stratégie Trois Ema initialisée ! ")
+            Bot = bot.TroisMA(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
+            bot.Bot.open_buy(Bot)
+            self.pill2kill.append(Bot)
+        if strat.get() == "Zscore" : 
+            print("Stratégie Zscore initialisée ! ")
+            Bot = bot.Zscore(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
+            bot.Bot.open_buy(Bot)
+            self.pill2kill.append(Bot)
+        if strat.get() == "Eveningstar" : 
+            print("Stratégie Eveningstar initialisée ! ")
+            Bot = bot.reco_eveningstar(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
+            bot.Bot.open_buy(Bot)
+            self.pill2kill.append(Bot)
+        if strat.get() == "Morningstar" : 
+            print("Stratégie Morningstar initialisée ! ")
+            Bot = bot.reco_morningstar(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
+            bot.Bot.open_buy(Bot)
+            self.pill2kill.append(Bot)
+        if strat.get() == "SAR + MACD + 200 Ema" : 
+            print("Stratégie PSAR_MACD initialisée ! ")
+            Bot = bot.PSAR_MACD(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
             bot.Bot.open_buy(Bot)
             self.pill2kill.append(Bot)
     
@@ -147,6 +195,7 @@ class Myapp :
         print(self.pill2kill)
         for thread in self.pill2kill :
             bot.Bot.kill(thread) 
+    
            
 
 
