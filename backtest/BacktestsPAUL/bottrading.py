@@ -5,9 +5,6 @@ import yfinance as yf
 import requests as rq
 from binance import *
 import asyncio
-import json
-import requests
-import time
 from matplotlib import *
 import matplotlib.pyplot as plt
 import numpy as np
@@ -73,12 +70,13 @@ async def main(filename,backtest,start,end):
             """
 
             k+=Decimal(1)
-            
+
+            #Ici on met à jour les informations importantes dans le backtest à chaque itération
             back1.updateL(back1.Capital,dataframe6mois5m.loc[int(k),'date'],dataframe6mois5m.loc[int(k),'price'])
 
             
-
-            # if dataframe6mois5m.loc[int(k),'20Zscore_price'] >= 3:
+            """ Code commenté utile """
+            # if dataframe6mois5m.loc[int(k),'20Zscore_price'] >= 3: #Ici code pour startégie zscore
             #     shortpossibility = True
             # elif dataframe6mois5m.loc[int(k),'20Zscore_price'] <= 1:
             #     shortpossibility = False
@@ -86,6 +84,7 @@ async def main(filename,backtest,start,end):
             #     longpossibility = True
             # elif dataframe6mois5m.loc[int(k),'20Zscore_price'] >= -1:
             #     longpossibility = False
+            """ Fin Code commenté utile """
 
             #On définit les entrées dans un trade (entrée long =/= de entréé short)
             Entryconditionshort = dataframe6mois5m.loc[int(k),'20Zscore_price'] < dataframe6mois5m.loc[int(k) - 1,'20Zscore_price'] and dataframe6mois5m.loc[int(k) - 1 ,'20Zscore_price'] > 2.4
@@ -97,15 +96,15 @@ async def main(filename,backtest,start,end):
             #
             if Entryconditionshort and not Entryconditionlong:
                 typetrade = 'short'
-                back1.automatisation_backtest(TP , SL, typetrade, Entryconditionshort, Entryconditionlong, k, enCours, '5m', Lindex, Lprice, LCapital)
+                #Il faut ici changer la timeframe en fonction de sur quelle timeframe est la stratégie principale. 
+                back1.automatisation_backtest(TP , SL, typetrade, Entryconditionshort, Entryconditionlong, k, enCours, '5m', Lindex, Lprice, LCapital, True)
                 k = back1.indice
-
-            # if Entryconditionlong and not Entryconditionshort:
-            #     typetrade = 'long'
-            #     back1.automatisation_backtest(TP , SL, typetrade, Entryconditionlong, Entryconditionlong, k, enCours, '5m', Lindex, Lprice, LCapital)
-            #     k = back1.indice
-            #     longpossibility = False
-
+            
+            if Entryconditionlong and not Entryconditionshort:
+                typetrade = 'long'
+                back1.automatisation_backtest(TP , SL, typetrade, Entryconditionlong, Entryconditionlong, k, enCours, '5m', Lindex, Lprice, LCapital)
+                k = back1.indice
+                longpossibility = False
 
 #sauvegarde de variables utiles pour juger de la viabilité d'une stratégie
     Winrate = (back1.Winrate / back1.nombreDeTrade) * 100
@@ -124,7 +123,7 @@ async def main(filename,backtest,start,end):
 # fin = int(input("indice de fin, doit être supérieur à indice de début : "))
 # asyncio.run(main(a,b,debut,fin))
 
-asyncio.run(main('essai1.json' ,'True',100,67000))
+asyncio.run(main('./essai1.json' ,'True',100,67000))
 
 
 """"
