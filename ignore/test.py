@@ -1,3 +1,5 @@
-a = [1]
-b = [2]
-print(a+b)
+a = ['okay','bokay','sokay','kokay']
+a.pop(2)
+b = int("0")
+print(a)
+print(type(b))

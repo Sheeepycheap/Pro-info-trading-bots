@@ -170,9 +170,7 @@ class Zscore(Bot) :
             }
             self.position_ouverte = False 
             self.df = ind.ydataframe(stock = ysymbol, start= '2022-05-10', interval='5m')
-            print(self.df) 
             ind.zscore(self.df, length= 20, column = 'Close')
-            print(self.df)
             # cette série d'opération sur self.df permet d'actualiser la dataframe (base de donnée) self.df en ajoutant 
             # la colonne 20Zscore
             self.pill2kill = []

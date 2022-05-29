@@ -138,7 +138,7 @@ class Myapp :
         label_tokill = Label(self.bot_frame, text="Indiquez la stratégie que vous voulez arrêtez",font=("Courrier", 10), bg = "#252424", fg = 'white')
         tokillEntry = Entry(self.bot_frame,width= 25)
         kill_allButton = Button(self.bot_frame,text = "KILL ALL",bg="#DB1E00",fg ='white',command = self.kill_all)
-        killButton = Button(self.bot_frame,text = "KILL",bg="#DB1E00",fg ='white',width=6)
+        killButton = Button(self.bot_frame,text = "KILL",bg="#DB1E00",fg ='white',width=6,command = partial(self.kill,tokillEntry))
         # Affichage de la frame (empaquettage)
         label_title1.pack(side = TOP)
         label_strat.pack(pady=3)
@@ -195,7 +195,16 @@ class Myapp :
         print(self.pill2kill)
         for thread in self.pill2kill :
             bot.Bot.kill(thread) 
+            
+        for j in (len(self.pill2kill)) :
+            self.pill2kill.pop(j)
     
+    def kill(self,entry) : 
+        num = int(entry.get())
+        bot.Bot.kill(self.pill2kill[num])
+        self.pill2kill.pop(num)
+
+
            
 
 

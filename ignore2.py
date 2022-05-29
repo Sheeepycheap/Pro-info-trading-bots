@@ -7,7 +7,7 @@ import yfinance as yf
 import talib as tab
 import numpy as np
 
-df = ind.ydataframe(stock = "ETH-USD", start = '2021-05-10', interval='1h')
+df = ind.ydataframe(stock = "BTC-USD", start = '2021-05-10', interval='1h')
 print(df)
 #df = ind.slice_data(df,slice=4)
 #print(df)
