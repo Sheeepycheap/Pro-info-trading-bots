@@ -44,6 +44,7 @@ class TroisMA(Bot) :
         #Constructeur de la classe. On initialise le champ orders qui est le ticket d'entrée. On ne 
         #spécifie que le symbol et le volume. Attention pour le symbol, il faut spécifier celui de 
         #""
+        self.volume = volume 
         self.mt5symbol = mt5symbol
         self.ysymbol = ysymbol
         self.orders = {
@@ -153,6 +154,7 @@ class Zscore(Bot) :
             #Constructeur de la classe. Très similaire au précédent et à ce qui vont suivre.
             #""
             self.mt5symbol = mt5symbol
+            self.volume = volume 
             self.ysymbol = ysymbol
             self.orders = {
             "action" : "a"  ,  
@@ -260,6 +262,7 @@ class reco_morningstar(Bot) :
             #""
             self.mt5symbol = mt5symbol
             self.ysymbol = ysymbol
+            self.volume = volume
             self.orders = {
             "action" : "a"  ,  
             "symbol" : mt5symbol ,
@@ -351,6 +354,7 @@ class reco_eveningstar(Bot) :
         def __init__(self, mt5symbol : str, volume : float, ysymbol :str) -> None:
             self.mt5symbol = mt5symbol
             self.ysymbol = ysymbol
+            self.volume = volume
             self.orders = {
             "action" : "a"  ,  
             "symbol" : mt5symbol ,
@@ -456,6 +460,7 @@ class PSAR_MACD(Bot) :
         def __init__(self, mt5symbol : str, volume : float, ysymbol :str) -> None:
             self.mt5symbol = mt5symbol
             self.ysymbol = ysymbol
+            self.volume = volume
             self.orders = {
             "action" : "a"  ,  
             "symbol" : mt5symbol ,

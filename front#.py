@@ -23,6 +23,7 @@ class Myapp :
         # initialisation des frames de l'onglet "bots"
         self.bot_frame = Frame(self.root,bg="#4A4A4A")
         self.accceuil_frame = Frame(self.root,bg="#4A4A4A")
+        self.help_frame = Frame(self.root,bg="#4A4A4A")
         # Initialisation des threads à terminer :
         self.pill2kill = []
         # Initialisation des bots qui seront activés
@@ -185,6 +186,7 @@ class Myapp :
             Bot = bot.Zscore(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
             bot.Bot.open_buy(Bot)
             self.pill2kill.append(Bot)
+            self.bot_actif.append(["Zscore", Bot.mt5symbol , Bot.volume]) 
         if strat.get() == "Eveningstar" : 
             print("Stratégie Eveningstar initialisée ! ")
             Bot = bot.reco_eveningstar(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
@@ -200,12 +202,14 @@ class Myapp :
             Bot = bot.PSAR_MACD(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
             bot.Bot.open_buy(Bot)
             self.pill2kill.append(Bot)
-        self.bot_actif.append(["strat", "mt5_key", "volume"]) 
 
     def kill(self,tokillEntry) : 
         num = int(tokillEntry.get())
         bot.Bot.kill(self.pill2kill[num])
         self.pill2kill.pop(num)
+        self.bot_actif.pop(num)
+        print(self.pill2kill)
+        print(self.bot_actif)
     
     def kill_all(self) : 
         # ""
@@ -214,6 +218,10 @@ class Myapp :
         print(self.pill2kill)
         for thread in self.pill2kill :
             bot.Bot.kill(thread) 
+
+        for j in (len(self.pill2kill)) :
+            self.pill2kill.pop(j)
+            self.bot_actif.pop(j)
 
     def help_frames(self):
         # ""
@@ -224,7 +232,7 @@ class Myapp :
         help_title.pack(expand=YES)
         help_txt= Label(self.help_frame, text="Votre compte MetaTrader5 est directement connecté à ce logiciel, \n pour démarrer votre session il vous suffit de vous rendre dans la section bot pour en créer un nouveau. \n Vous devrez choisir une stratégie (toutes les informations relatives à chacun sont condensées dans l'onglet stratégie), \n un volume à trader ainsi que votre actif d'intérêt. Une fois lancé, toutes les informations relatives\n à votre bot se retrouveront sur la frame principale", font =("Courrier",15),bg= "#4A4A4A",fg='white')
         help_txt.pack(expand=YES) #les informations liées seront ainsi ajoutées à la page
-    
+        self.help_frame.pack(expand=YES)
     # Les 5 fonctions openWindowStrategy servent à ouvrir des pages contenant l'ensemble des informations relatives à chacune des stratégies implémentées
     # Leur construction est identique, seul le fichier texte diffère
     def openWindowStrategyA(self):
