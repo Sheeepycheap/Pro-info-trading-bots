@@ -181,6 +181,7 @@ class Myapp :
             Bot = bot.TroisMA(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
             bot.Bot.open_buy(Bot)
             self.pill2kill.append(Bot)
+            self.bot_actif.append(["Trois Ema", Bot.mt5symbol , Bot.volume])
         if strat.get() == "Zscore" : 
             print("Stratégie Zscore initialisée ! ")
             Bot = bot.Zscore(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
@@ -192,16 +193,19 @@ class Myapp :
             Bot = bot.reco_eveningstar(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
             bot.Bot.open_buy(Bot)
             self.pill2kill.append(Bot)
+            self.bot_actif.append(["Eveningstar", Bot.mt5symbol , Bot.volume])
         if strat.get() == "Morningstar" : 
             print("Stratégie Morningstar initialisée ! ")
             Bot = bot.reco_morningstar(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
             bot.Bot.open_buy(Bot)
             self.pill2kill.append(Bot)
+            self.bot_actif.append(["Morningstar", Bot.mt5symbol , Bot.volume])
         if strat.get() == "SAR + MACD + 200 Ema" : 
             print("Stratégie PSAR_MACD initialisée ! ")
             Bot = bot.PSAR_MACD(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
             bot.Bot.open_buy(Bot)
             self.pill2kill.append(Bot)
+            self.bot_actif.append(["SAR + MACD + 200 Ema", Bot.mt5symbol , Bot.volume])
 
     def kill(self,tokillEntry) : 
         num = int(tokillEntry.get())
