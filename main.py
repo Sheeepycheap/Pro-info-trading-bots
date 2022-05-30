@@ -23,8 +23,11 @@ class Myapp :
         # initialisation des frames de l'onglet "bots"
         self.bot_frame = Frame(self.root,bg="#4A4A4A")
         self.accceuil_frame = Frame(self.root,bg="#4A4A4A")
+        self.help_frame = Frame(self.root,bg="#4A4A4A")
         # Initialisation des threads à terminer :
         self.pill2kill = []
+        # Initialisation des bots qui seront activés
+        self.bot_actif = []
 
     def menu_bar(self) :
         #""
@@ -34,13 +37,14 @@ class Myapp :
         nav_bar = Menu(self.root)
         nav_bar.add_command(label = "Acceuil", command = self.to_acceuil)
         file_menu = Menu(nav_bar,tearoff = 0)
-        file_menu.add_command(label="Stratégie A")
-        file_menu.add_command(label = "Stratégie B")
-        file_menu.add_command(label = "Bref t'as compris ...")
+        file_menu.add_command(label="Trois Ema", command = self.openWindowStrategyA)
+        file_menu.add_command(label = "Zscore", command = self.openWindowStrategyB)
+        file_menu.add_command(label = "Eveningstar", command = self.openWindowStrategyC)
+        file_menu.add_command(label = "Morningstar", command = self.openWindowStrategyD)
+        file_menu.add_command(label = "SAR + MACD + 200 Ema", command = self.openWindowStrategyE)
         nav_bar.add_cascade(label = "Stratégies", menu = file_menu)
         nav_bar.add_command(label = "Bots", command = self.to_bots)        
-        nav_bar.add_command(label = "Help")    
-        nav_bar.add_command(label = "Déconnexion")  
+        nav_bar.add_command(label = "Help", command = self.to_help)     
         self.root.config(menu = nav_bar)
 
     def hide_frames(self) :
@@ -52,6 +56,8 @@ class Myapp :
         self.bot_frame.destroy()
         self.accceuil_frame.pack_forget()
         self.accceuil_frame.destroy()
+        self.help_frame.pack_forget()
+        self.help_frame.destroy()
 
     def to_acceuil(self) :
         self.hide_frames()
@@ -60,16 +66,24 @@ class Myapp :
     def to_bots(self) : 
         self.hide_frames()
         self.bots_frame() 
+    
+    def to_help(self) : 
+        self.hide_frames()
+        self.help_frames()
 
     def acceuil_frame(self) :
+        # ""
+        # Cette méthode construit la frame d'acceuil du logiciel
+        # Elle contient un tableau référençant les bots activés 
+        # "" 
         self.accceuil_frame = Frame(self.root,bg="#4A4A4A")
-        label_title = Label(self.accceuil_frame, text="Bienvenue sur l'acceuil !", font =("Courrier",30),bg= "#4A4A4A",fg='white')
-        label_subtitle = Label(self.accceuil_frame, text="Veuillez indiquer vos identifiants de Connexion MetaTrader5 :", font=("Courrier", 15), bg = "#4A4A4A", fg = 'white')
-        label_usr = Label(self.accceuil_frame,text="Nom D'utilisateur :", font=("Courrier", 10), bg = "#252424", fg = 'white')
-        label_title.pack()
-        label_subtitle.pack(pady=35)
-        label_usr.pack(pady=3)
-        self.accceuil_frame.pack(expand = YES)
+        tree = ttk.Treeview(self.root, columns = (1,2,3) , height=5, show = "headings")
+        tree.place(x = 220 , y = 220 , width = 600 , height = 200)
+        tree.heading(1, text="Strategie")
+        tree.heading(2, text="Actif")
+        tree.heading(3, text="Volume")
+        for i in self.bot_actif:
+            tree.insert(parent='', index='end', values=(i[0], i[1], i[2]))
 
     def connexion_frame(self) :
         #""
@@ -138,7 +152,7 @@ class Myapp :
         label_tokill = Label(self.bot_frame, text="Indiquez la stratégie que vous voulez arrêtez",font=("Courrier", 10), bg = "#252424", fg = 'white')
         tokillEntry = Entry(self.bot_frame,width= 25)
         kill_allButton = Button(self.bot_frame,text = "KILL ALL",bg="#DB1E00",fg ='white',command = self.kill_all)
-        killButton = Button(self.bot_frame,text = "KILL",bg="#DB1E00",fg ='white',width=6,command = partial(self.kill,tokillEntry))
+        killButton = Button(self.bot_frame,text = "KILL",bg="#DB1E00",fg ='white',width=6, command = partial(self.kill, tokillEntry))
         # Affichage de la frame (empaquettage)
         label_title1.pack(side = TOP)
         label_strat.pack(pady=3)
@@ -167,48 +181,111 @@ class Myapp :
             Bot = bot.TroisMA(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
             bot.Bot.open_buy(Bot)
             self.pill2kill.append(Bot)
+            self.bot_actif.append(["Trois Ema", Bot.mt5symbol , Bot.volume])
         if strat.get() == "Zscore" : 
             print("Stratégie Zscore initialisée ! ")
             Bot = bot.Zscore(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
             bot.Bot.open_buy(Bot)
             self.pill2kill.append(Bot)
+            self.bot_actif.append(["Zscore", Bot.mt5symbol , Bot.volume]) 
         if strat.get() == "Eveningstar" : 
             print("Stratégie Eveningstar initialisée ! ")
             Bot = bot.reco_eveningstar(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
             bot.Bot.open_buy(Bot)
             self.pill2kill.append(Bot)
+            self.bot_actif.append(["Eveningstar", Bot.mt5symbol , Bot.volume])
         if strat.get() == "Morningstar" : 
             print("Stratégie Morningstar initialisée ! ")
             Bot = bot.reco_morningstar(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
             bot.Bot.open_buy(Bot)
             self.pill2kill.append(Bot)
+            self.bot_actif.append(["Morningstar", Bot.mt5symbol , Bot.volume])
         if strat.get() == "SAR + MACD + 200 Ema" : 
             print("Stratégie PSAR_MACD initialisée ! ")
             Bot = bot.PSAR_MACD(mt5symbol=mt5_key.get(), volume = ind.money_to_volume(mt5_key.get(),float(volume.get())) , ysymbol=yfinance_key.get())
             bot.Bot.open_buy(Bot)
             self.pill2kill.append(Bot)
+            self.bot_actif.append(["SAR + MACD + 200 Ema", Bot.mt5symbol , Bot.volume])
+
+    def kill(self,tokillEntry) : 
+        num = int(tokillEntry.get())
+        bot.Bot.kill(self.pill2kill[num])
+        self.pill2kill.pop(num)
+        self.bot_actif.pop(num)
+        print(self.pill2kill)
+        print(self.bot_actif)
     
     def kill_all(self) : 
         # ""
         # Cette méthode permet de terminer tous les bots en faisant appel à la méthode kill() de leurs classes.
         # ""
-        print(self.pill2kill)
         for thread in self.pill2kill :
             bot.Bot.kill(thread) 
+
+        for j in range(len(self.pill2kill)) :
+            self.pill2kill.pop(0)
+            self.bot_actif.pop(0)
             
-        for j in (len(self.pill2kill)) :
-            self.pill2kill.pop(j)
+        print(self.pill2kill)
+        print(self.bot_actif)
+    def help_frames(self):
+        # ""
+        # Cette fonction permet d'afficher la frame d'aide contenant les instructions pour se servir du logiciel
+        # ""
+        self.help_frame = Frame(self.root,bg="#4A4A4A")
+        help_title= Label(self.help_frame,text="Tutoriel pour se servir de ce logiciel de trading", font =("Courrier",15),bg= "#4A4A4A",fg='white')
+        help_title.pack(expand=YES)
+        help_txt= Label(self.help_frame, text="Votre compte MetaTrader5 est directement connecté à ce logiciel, \n pour démarrer votre session il vous suffit de vous rendre dans la section bot pour en créer un nouveau. \n Vous devrez choisir une stratégie (toutes les informations relatives à chacun sont condensées dans l'onglet stratégie), \n un volume à trader ainsi que votre actif d'intérêt. Une fois lancé, toutes les informations relatives\n à votre bot se retrouveront sur la frame principale", font =("Courrier",15),bg= "#4A4A4A",fg='white')
+        help_txt.pack(expand=YES) #les informations liées seront ainsi ajoutées à la page
+        self.help_frame.pack(expand=YES)
+    # Les 5 fonctions openWindowStrategy servent à ouvrir des pages contenant l'ensemble des informations relatives à chacune des stratégies implémentées
+    # Leur construction est identique, seul le fichier texte diffère
+    def openWindowStrategyA(self):
+        newWindowA= Toplevel(self.root)
+        newWindowA.title("Stratégie Trois Ema")
+        newWindowA.geometry("1080x720")
+        newWindowA.config(background="#4A4A4A")
+        newWindowA.minsize(720,480)
+        strat_A= Label(newWindowA,text="Comment fonctionne la stratégie ?", font =("Courrier",15),bg= "#4A4A4A",fg='white')
+        strat_A.pack(expand=YES)
     
-    def kill(self,entry) : 
-        num = int(entry.get())
-        bot.Bot.kill(self.pill2kill[num])
-        self.pill2kill.pop(num)
+    def openWindowStrategyB(self):
+        newWindowB= Toplevel(self.root)
+        newWindowB.title("Stratégie Zscore")
+        newWindowB.geometry("1080x720")
+        newWindowB.config(background="#4A4A4A")
+        newWindowB.minsize(720,480)
+        strat_B= Label(newWindowB,text="Comment fonctionne la stratégie ?", font =("Courrier",15),bg= "#4A4A4A",fg='white')
+        strat_B.pack(expand=YES)
 
-
+    def openWindowStrategyC(self):
+        newWindowC= Toplevel(self.root)
+        newWindowC.title("Stratégie Eveningstar")
+        newWindowC.geometry("1080x720")
+        newWindowC.config(background="#4A4A4A")
+        newWindowC.minsize(720,480)
+        strat_C= Label(newWindowC,text="Comment fonctionne la stratégie ?", font =("Courrier",15),bg= "#4A4A4A",fg='white')
+        strat_C.pack(expand=YES)
+    
+    def openWindowStrategyD(self):
+        newWindowC= Toplevel(self.root)
+        newWindowC.title("Stratégie Morningstar")
+        newWindowC.geometry("1080x720")
+        newWindowC.config(background="#4A4A4A")
+        newWindowC.minsize(720,480)
+        strat_D= Label(newWindowC,text="Comment fonctionne la stratégie ?", font =("Courrier",15),bg= "#4A4A4A",fg='white')
+        strat_D.pack(expand=YES)
+    
+    def openWindowStrategyE(self):
+        newWindowC= Toplevel(self.root)
+        newWindowC.title("Stratégie SAR + MACD + 200 Ema")
+        newWindowC.geometry("1080x720")
+        newWindowC.config(background="#4A4A4A")
+        newWindowC.minsize(720,480)
+        strat_E= Label(newWindowC,text="Comment fonctionne la stratégie ?", font =("Courrier",15),bg= "#4A4A4A",fg='white')
+        strat_E.pack(expand=YES)
            
 
 
 test = Myapp()
 test.root.mainloop()
-
-

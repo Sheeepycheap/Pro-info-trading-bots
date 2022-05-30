@@ -13,7 +13,6 @@ def ydataframe(stock : str, start : str , interval : str ) -> pd.DataFrame :
     # pas dépasser 60 jours par exemple). Pour du backtest, il faut importer la data manuellement, mais 
     # pour du live trading, cela suffit. 
     # ""
-
     df = yf.download(stock,start = start, interval=interval )
     df.dropna(inplace=True)
     return df

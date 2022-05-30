@@ -148,7 +148,6 @@ class Zscore(Bot) :
     # Implémentons la stratégie du Zscore. Le Zscore à un instant T est simplement la distance entre la moyenne et le cours en nombre d'écart 
     # type.  
     #""
-
         def __init__(self, mt5symbol : str, volume : float, ysymbol :str) -> None:
             #""
             #Constructeur de la classe. Très similaire au précédent et à ce qui vont suivre.
@@ -608,9 +607,6 @@ class PSAR_MACD(Bot) :
 
 # usr_login(usr = 41600933, mdp = "ZL6HzUageSX6", server = "AdmiralMarkets-Demo" )
 
-# botzscore = PSAR_MACD(mt5symbol="EURUSD",volume=0.01,ysymbol="EURUSD=X")
-# print(botzscore.df)
-# botzscore.process_open_buy()
 
 
 
