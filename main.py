@@ -228,6 +228,7 @@ class Myapp :
             
         print(self.pill2kill)
         print(self.bot_actif)
+
     def help_frames(self):
         # ""
         # Cette fonction permet d'afficher la frame d'aide contenant les instructions pour se servir du logiciel
@@ -247,7 +248,9 @@ class Myapp :
         newWindowA.config(background="#4A4A4A")
         newWindowA.minsize(720,480)
         strat_A= Label(newWindowA,text="Comment fonctionne la stratégie ?", font =("Courrier",15),bg= "#4A4A4A",fg='white')
+        strat_A1= Label(newWindowA, text="Lorsque les trois ema ( 5 20 60) sont croisées positivement \n alors on a un signal d'achat. Si elles sont croisées négativement on a un signal de sell", font =("Courrier",15),bg= "#4A4A4A",fg='white')
         strat_A.pack(expand=YES)
+        strat_A1.pack(expand = YES)
     
     def openWindowStrategyB(self):
         newWindowB= Toplevel(self.root)
@@ -256,7 +259,9 @@ class Myapp :
         newWindowB.config(background="#4A4A4A")
         newWindowB.minsize(720,480)
         strat_B= Label(newWindowB,text="Comment fonctionne la stratégie ?", font =("Courrier",15),bg= "#4A4A4A",fg='white')
+        strat_B1= Label(newWindowB, text="Lorsque le zscore est supérieur 2.4 alors on a un signal short, on fait exclusivement des shorts", font =("Courrier",15),bg= "#4A4A4A",fg='white')
         strat_B.pack(expand=YES)
+        strat_B1.pack(expand = YES)
 
     def openWindowStrategyC(self):
         newWindowC= Toplevel(self.root)
@@ -265,7 +270,9 @@ class Myapp :
         newWindowC.config(background="#4A4A4A")
         newWindowC.minsize(720,480)
         strat_C= Label(newWindowC,text="Comment fonctionne la stratégie ?", font =("Courrier",15),bg= "#4A4A4A",fg='white')
+        strat_C1 = Label(newWindowC, text = "Lorsque la bougie est un marteau (c'est à dire longue meche vers le bas \n et petit corp mais la fermeture est supérieure à l'ouverture) après des bougies rouges alors on a des bons signaux buy", font =("Courrier",15),bg= "#4A4A4A",fg='white')
         strat_C.pack(expand=YES)
+        strat_C1.pack(expand = YES)
     
     def openWindowStrategyD(self):
         newWindowC= Toplevel(self.root)
@@ -274,7 +281,9 @@ class Myapp :
         newWindowC.config(background="#4A4A4A")
         newWindowC.minsize(720,480)
         strat_D= Label(newWindowC,text="Comment fonctionne la stratégie ?", font =("Courrier",15),bg= "#4A4A4A",fg='white')
+        strat_D1 = Label(newWindowC, text = "Lorsque la bougie est un une étoile du matin (c'est à dire longue meche au dessus \n de la bougie et petit corp mais la fermeture est inférieure à l'ouverture) après des bougies vertes alors on a \n des bons signaux short", font =("Courrier",15),bg= "#4A4A4A",fg='white')
         strat_D.pack(expand=YES)
+        strat_D1.pack(expand = YES)
     
     def openWindowStrategyE(self):
         newWindowC= Toplevel(self.root)
@@ -283,8 +292,9 @@ class Myapp :
         newWindowC.config(background="#4A4A4A")
         newWindowC.minsize(720,480)
         strat_E= Label(newWindowC,text="Comment fonctionne la stratégie ?", font =("Courrier",15),bg= "#4A4A4A",fg='white')
+        strat_E1 = Label(newWindowC, text ="Lorsque le MACD est postif et que le prix est audessus de l'EMA 200 \n alors on prend tout les signaux buy issus du SAR (SAR = bull). Lorsque le MACD est négatif et que le prix en dessous de l'EMA 200 \n alors on prend tout les signaux sell du SAR ( SAR = bear) ", font =("Courrier",15),bg= "#4A4A4A",fg='white')
         strat_E.pack(expand=YES)
-           
+        strat_E1.pack(expand = YES)
 
 
 test = Myapp()
