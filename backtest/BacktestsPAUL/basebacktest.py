@@ -104,6 +104,7 @@ async def main(filename,backtest,start,end):
                 back1.automatisation_backtest(TP , SL, typetrade, Entryconditionlong, Entryconditionlong, k, enCours, '15m', Lindex, Lprice, LCapital)
                 k = back1.indice
                 longpossibility = False
+                
 #sauvegarde de variables utiles pour juger de la viabilité d'une stratégie
     Winrate = (back1.Winrate / back1.nombreDeTrade) * 100
     print("nombre de trade: " + str(back1.nombreDeTrade))
@@ -116,10 +117,10 @@ async def main(filename,backtest,start,end):
 
 
 a = input("Entrez nom_du_fichier.json : ")
-# b = input("backtestet ? (True or False) : ")
+
 debut = int(input("Faire le choix de l'indice de début (de 0 à " + str(len(dataframe6mois5m)) + " ) : "))
 fin = int(input("Faire le choix de l'indice de fin, doit être supérieur à indice de début et inférieur à " + str(len(dataframe6mois5m)) + " : "))
-# asyncio.run(main(a,b,debut,fin))
+
 
 asyncio.run(main(a ,'True',debut,fin))
 
