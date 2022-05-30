@@ -412,7 +412,6 @@ class reco_eveningstar(Bot) :
             while self.dead :
                 bid = mt5.symbol_info_tick(self.mt5symbol).bid
                 n=len(self.df) - 1  
-                print(self.df) 
                 if  self.df['Eveningstar'][n] == -100 and self.df['RSI'] > 30 and self.position_ouverte == False :
                     prix = mt5.symbol_info_tick(self.mt5symbol).ask
                     self.sl = bid + 0.01*bid
