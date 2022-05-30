@@ -129,7 +129,7 @@ def PSAR(df, af=0.02, max=0.2):
                 df.loc[a,'EP'] = df.loc[a-1, 'EP']
                 df.loc[a, 'AF'] = df.loc[a-1, 'AF']
 
-            if df.loc[a-1, 'PSAR'] > df.loc[a,'low'] : 
+            if df.loc[a, 'PSAR'] > df.loc[a,'low'] : 
                 df.loc[a, 'PSARdir'] = 'bear'
                 df.loc[a,'EP'] = df.loc[a, 'low']
                 df.loc[a, 'AF'] = af
@@ -150,7 +150,7 @@ def PSAR(df, af=0.02, max=0.2):
             else:
                 df.loc[a,'EP'] = df.loc[a-1, 'EP']
                 df.loc[a, 'AF'] = df.loc[a-1, 'AF']
-            if df.loc[a-1, 'PSAR'] < df.loc[a,'high'] : 
+            if df.loc[a, 'PSAR'] < df.loc[a,'high'] : 
                 df.loc[a, 'PSARdir'] = 'bull'
                 df.loc[a,'EP'] = df.loc[a, 'high']
                 df.loc[a, 'AF'] = af

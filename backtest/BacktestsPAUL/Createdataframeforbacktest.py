@@ -7,11 +7,11 @@ import pandas as pd
 import yfinance as yf
 import requests as rq
 from binance import *
-import time
+import time as time
 from matplotlib import *
 import matplotlib.pyplot as plt
 import numpy as np
-from datetime import *
+import datetime as datetime
 from math import *
 from decimal import *
 import Indicateursbacktest as ind
@@ -42,6 +42,12 @@ def dataframe(filename, timeframe : str, Starttime : int ,backtest : bool, pair 
     -Backtest : True si les données doivent etre sauvegardés pour pouvoir travailler dessus ou False si c'est des données à utiliser en live trading
     
     -La paire avec "pair" : Toutes les paires disponibles sur binance sont récupérables. Par exemple : BTCUSDT renvoie les différents prix du bitcoin en fonction du prix du dollar.
+
+    ---
+    Remarques
+    ---
+    On n'effectue pas de calculs des indicateurs sur la dataframe 1 minutes car, on n'élabore pas de stratégies sur une timeframe aussi faible (trop volatile) et le temps de calcul des indacateurs est
+    très long
     """
     #Ici choix de la timeframe
     if timeframe == '5m':
@@ -78,11 +84,12 @@ def dataframe(filename, timeframe : str, Starttime : int ,backtest : bool, pair 
     
     df = pd.DataFrame(d)
     dataframe = df.reset_index(drop = True)
-    ind.PSAR(dataframe)
-    ind.zscore(dataframe, 20, "price")
-    ind.sma(dataframe,20, '20Zscore_price')
-    ind.sma(dataframe, 7, 'price')
-    ind.MACD(dataframe, 'price')
+    if timeframe != '1m':
+        ind.PSAR(dataframe)
+        ind.zscore(dataframe, 20, "price")
+        ind.sma(dataframe,20, '20Zscore_price')
+        ind.sma(dataframe, 7, 'price')
+        ind.MACD(dataframe, 'price')
     
 
     if backtest:
@@ -101,7 +108,7 @@ if backtest == 'True':
     timestart = input("Choisissez un temps unix en milliseconde pour démarer la création de dataframe : ")
     try:
         timestart = int(timestart)
-        test1 = timestart/10**13
+        test1 = timestart/(10**12)
         if int(test1) !=1:
             timestart = 1629756000000 #valeur par défault
             print('timestart value is not usuable default value 1629756000000 has been used')
@@ -112,10 +119,10 @@ if backtest == 'True':
     except:
         timestart = 1629756000000
         print('timestart value is not usuable default value 1629756000000 has been used')
-    paire = input('Choisissez la paire pour la base de données: Ex: BTCUSDT ')
-    lengthofdataframe = (int(time.time()) - timestart/1000)/(3600*24*30)
+    paire = input('Choisissez la paire pour la base de données (Ex: BTCUSDT) : ')
+    lengthofdataframe = round((int(time.time()) - timestart/1000)/(3600*24*30),1)
     name = "dataframe" + str(lengthofdataframe) + 'mois' + timeframe + paire
-    dataframe1 = dataframe(name, paire , timestart, True, paire)
+    dataframe1 = dataframe(name, timeframe, timestart, True, paire)
 
 
 
@@ -128,8 +135,9 @@ if backtest == 'True':
 
 # dataframe6mois5mBTC = dataframe('dataframe6mois5mBTC', '5m', 1629756000000, True, 'BTCUSDT')
 # dataframe6mois5mBTC.to_pickle('./dataframe6mois5mBTC') 
-# dataframe6mois5mBTC = pd.read_pickle("./dataframe6mois5mBTC") #last tf at 67514 rn
-
+# dataframe6mois5mBTC = pd.read_pickle("dataframe9.3mois1mBTCUSDT") #last tf at 67514 rn
+# print(dataframe6mois5mBTC.loc[26700:,'price':'PSARdir'])
+# print(dataframe6mois5mBTC.iloc[-4:,:])
 # dataframe6mois4hBTC = dataframe('dataframe6mois4hBTC', '4h', 1629756000000, True, 'BTCUSDT')
 # dataframe6mois4hBTC = pd.read_pickle('./dataframe6mois4hBTC')
 # dataframe6mois4hBTC.to_pickle('./dataframe6mois4hBTC')
@@ -153,7 +161,7 @@ if backtest == 'True':
 
 #     print(dataframe6mois1m.loc[dataframe6mois1m['date'] == 1629756000+k*60,'price']
 # print(dataframe6mois1m.iloc[-200:-150])
-# print(dataframe6mois5m.iloc[-4:])
+
 # print(datetime.utcfromtimestamp(1639460000 ).strftime('%Y-%m-%d %H:%M:%S'))
 
 # print(dataframe6mois5mBTC.loc[:,'7SMA_price']) #iloc[-20:,3:9] 

@@ -78,27 +78,32 @@ class backtest:
         self.SL = SL
         self.indice = indice
         self.enCours = enCours
-        # self.Lindex = Lindex  
-        # self.Lprice = Lprice
         Entryprice = 1
         Outprice = 1
         if typetrade == 'long':
             Entryprice = self.dataframe5.loc[int(self.indice),'price']
             entryTimestamp = self.dataframe5.loc[int(self.indice),'date']
             entryTime = datetime.utcfromtimestamp(entryTimestamp).strftime('%Y-%m-%d %H:%M:%S')
-            #on initialise les datas pour la timeframe 1m
-            
-            index = self.dataframe1.loc[self.dataframe1['date'] == entryTimestamp+self.getcurrentindex(timeframe),'price'].index[0]
-            # self.Lindex.append(self.dataframe1.loc[index,'date'])
-            # self.Lprice.append(self.dataframe5.loc[int(self.indice),'price'])
-            self.enCours = True
 
-            while (self.dataframe5.loc[int(self.indice),'20Zscore_price'] <= 0 or self.enCours) and self.indice < self.end: 
+            #on initialise les datas pour la timeframe 1m
+
+            index = self.dataframe1.loc[self.dataframe1['date'] == entryTimestamp+self.getcurrentindex(timeframe),'price'].index[0]
+            """" Exemples de tests unitaires qui ont pu etre effectués, on vérifie que la dataframe 1m est bien synchronisé avec la dataframe de base"""
+            # print(Entryprice) """" """"
+            # print(self.dataframe1.loc[index,'price'])
+
+            while (self.dataframe5.loc[int(self.indice),'PSARdir'] == 'bull') and self.indice < self.end: #or self.enCours
                 #ici on passe sur la dataframe une minute
                 #Les données en commun sont la date et l'heure de la mesure donc on va récupérer ca
+                a = self.indice
                 index +=1
-                self.indice = Decimal(str(indice)) + Decimal('0.2')
-
+                self.indice = Decimal(str(self.indice)) + self.getpasindex(timeframe)
+                count = 0
+                
+                if a == int(self.indice):
+                    count +=1
+                    if count >15:
+                        print('il y a un problème')
                 #Lorsque l'indice est un chiffre rond c'est que nous sommes à la cloture d'une bougie correspondant à la time frame
                 #Choisie initiale donc on l'ajoute à la liste pour pouvoir tracer le graphique à la fin
                 if Decimal(str(self.indice))%1 == 0.0:
@@ -133,6 +138,7 @@ class backtest:
                 self.indice = Decimal(ceil(self.indice))
             if not Decimal(str(self.indice))%1 == 0.0:
                 self.indice = Decimal(ceil(self.indice))
+                
         if typetrade == 'short':
             Entryprice = self.dataframe5.loc[int(self.indice),'price']
             entryTimestamp = self.dataframe5.loc[int(self.indice),'date']
@@ -140,14 +146,12 @@ class backtest:
             #on initialise les datas pour la timeframe 1m
 
             index = self.dataframe1.loc[self.dataframe1['date'] == entryTimestamp+self.getcurrentindex(timeframe),'price'].index[0]
-            self.enCours = True
 
-            while (self.dataframe5.loc[int(self.indice),'20Zscore_price'] <= -2.4 or self.enCours) and self.indice < self.end: 
+            while (self.dataframe5.loc[int(self.indice),'20Zscore_price'] > -2.4 ) and self.indice < self.end: #or self.enCours
                 #ici on passe sur la dataframe une minute
                 #Les données en commun sont la date et l'heure de la mesure donc on va récupérer ca
                 index +=1
-                self.indice = Decimal(str(indice)) + Decimal('0.2')
-
+                self.indice = Decimal(str(self.indice)) + self.getpasindex(timeframe)
                 #Lorsque l'indice est un chiffre rond c'est que nous sommes à la cloture d'une bougie correspondant à la time frame
                 #Choisie initiale donc on l'ajoute à la liste pour pouvoir tracer le graphique à la fin
                 if Decimal(str(self.indice))%1 == 0.0:
@@ -171,10 +175,12 @@ class backtest:
             self.Capital = self.Capital + Resultattrade
             self.nombreDeTrade += 1
             self.Gainmoyentrade += Resultattrade
+
             ####
             #Ici on enregistre le trade qui vient de se terminer ceci est un teste unitaire, il permet la validation d'un trade de plus 
             #Cela permet une verification si les données renvoyées ne sont pas abérantes, si les trades on bien pu etre prix en regardant les
             #différents graphiques
+
             ClosedTrade = {'Long ou short' : typetrade, 'Entry price' : Entryprice, 'Out price' : Outprice, 'Benefice on trade' : Resultattrade, 'Capital after this trade' : self.Capital, 'Date d\'entree' : entryTime, 'Date de sortie' : outTime}
             self.appendtrade(self.filename, ClosedTrade)
             if not Decimal(str(self.indice))%1 == 0.0:
@@ -203,6 +209,22 @@ class backtest:
         elif timeframe == '1d':
             pas = 24 * 60 * 60 - 60
         return pas
+
+    def getpasindex(self, timeframe):
+        pas = 0
+        if timeframe == '5m':
+            pas =  1/5
+        elif timeframe == '15m':
+            pas = 1/15
+        elif timeframe == '1h':
+            pas = 1/60
+        elif timeframe == '2h':
+            pas = 1/120
+        elif timeframe == '4h':
+            pas = 1/240
+        elif timeframe == '1d':
+            pas = 1/(24*60)
+        return Decimal(str(pas))
 
     def update_k(self):
         return self.indice
