@@ -604,7 +604,7 @@ class PSAR_MACD(Bot) :
 #         else : 
 #             print("Connexion réussie !")
 
-# usr_login(usr = 41600933, mdp = "ZL6HzUageSX6", server = "AdmiralMarkets-Demo" )
+# usr_login(usr = , mdp = "ZL6HzUageSX6", server = "AdmiralMarkets-Demo" )
 
 
 
